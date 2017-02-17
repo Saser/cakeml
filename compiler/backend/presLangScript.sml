@@ -19,3 +19,7 @@ val _ = Datatype`
   | Mat tra exp ((pat # exp) list)
   | Let tra (varN option) exp exp
   | Letrec tra ((varN # varN # exp) list) exp`;
+  | Dlet num exp
+  | Dletrec ((varN # varN # exp) list)
+  | Dtype (modN list) type_def
+  | Dexn (modN list) conN (t list)`;
