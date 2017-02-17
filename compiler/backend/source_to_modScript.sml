@@ -1,5 +1,5 @@
 open preamble astTheory terminationTheory modLangTheory;
-open jsonTheory;
+open jsonTheory presLangTheory;
 
 val _ = numLib.prefer_num();
 
@@ -255,6 +255,23 @@ val compile_def = Define`
   compile c p =
     let (_,e,p') = compile_prog c.next_global c.mod_env p in
     (c with mod_env := e, p')`;
+
+val ast_to_pres_dec_def = Define `
+  ast_to_pres_dec _ = Dec`;
+
+val ast_to_pres_tdec_def = Define `
+  ast_to_pres_tdec (Tdec d) = presLang$Tdec NONE NONE (ast_to_pres_dec d)
+  /\
+  ast_to_pres_tdec (Tmod m s d) = Tdec (SOME m) s (ast_to_pres_dec d)`;
+
+val ast_to_pres_def = Define `
+  (ast_to_pres tops = Top (MAP ast_to_pres_tdec tops))`;
+
+val ast_to_json_def = Define`
+  to_json p =
+    json$Object [
+                  ("lang", json$String "ast");
+                  ("prog", presLang$to_json (ast_to_pres p))]`;
 
 val ast_to_json_def = Define`
   ast_to_json _ = json$String "Hello, Ast!"`

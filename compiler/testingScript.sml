@@ -12,8 +12,13 @@ val _ = Define`
 val _ = Define`
   parse p = parse_prog (MAP FST (lexer_fun p))`;
 
-EVAL ``parse basic_prog``;
+val _ = Define`
+  parsed_basic =
+    case parse basic_prog of
+         NONE => [] 
+       | SOME x => x`;
 
+EVAL ``source_to_mod$ast_to_pres parsed_basic``;
 
 (* JSON *)
 val _ = Define `
