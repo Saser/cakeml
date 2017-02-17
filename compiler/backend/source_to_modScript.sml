@@ -256,8 +256,17 @@ val compile_def = Define`
     let (_,e,p') = compile_prog c.next_global c.mod_env p in
     (c with mod_env := e, p')`;
 
-val ast_to_pres_pat_def = Define`
-  ast_to_pres_pat _ = Pat`;
+val ast_to_pres_pat_def = tDefine "ast_to_pres_pat"`
+  ast_to_pres_pat (ast$Pvar varN) = presLang$Pvar varN
+  /\
+  ast_to_pres_pat (Plit lit) = Plit lit
+  /\
+  ast_to_pres_pat (Pcon id pats) = Pcon id (MAP ast_to_pres_pat pats)
+  /\
+  ast_to_pres_pat (Pref pat) = Pref (ast_to_pres_pat pat)
+  /\
+  ast_to_pres_pat (Ptannot pat t) = Ptannot (ast_to_pres_pat pat) t`
+  cheat;
 
 val ast_to_pres_exp_def = Define`
   ast_to_pres_exp _ = Exp`;

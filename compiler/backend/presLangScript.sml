@@ -25,8 +25,12 @@ val _ = Datatype`
     | Dtype type_def
     | Dtabbrev (tvarN list) typeN t
     | Dexn conN (t list)
-    (* TODO: Remove. This is a temporary type, to have one that terminates *)
-    | Pat
+    (* Patterns *)
+    | Pvar varN
+    | Plit lit
+    | Pcon (((modN, conN) id) option) (exp(*pat*) list)
+    | Pref exp(*pat*)
+    | Ptannot exp(*pat*) t
     | Exp`;
 
 val to_json_def = tDefine "to_json"`
