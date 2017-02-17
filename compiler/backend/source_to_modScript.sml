@@ -256,16 +256,34 @@ val compile_def = Define`
     let (_,e,p') = compile_prog c.next_global c.mod_env p in
     (c with mod_env := e, p')`;
 
-val ast_to_pres_dec_def = Define `
-  ast_to_pres_dec _ = Dec`;
+val ast_to_pres_pat_def = Define`
+  ast_to_pres_pat _ = Pat`;
 
-val ast_to_pres_tdec_def = Define `
-  ast_to_pres_tdec (Tdec d) = presLang$Tdec NONE NONE (ast_to_pres_dec d)
+val ast_to_pres_exp_def = Define`
+  ast_to_pres_exp _ = Exp`;
+
+(* Turn declarations into presLang. *)
+val ast_to_pres_dec_def = Define`
+  ast_to_pres_dec (ast$Dlet p e)= Dlet (ast_to_pres_pat p) (ast_to_pres_exp e)
   /\
-  ast_to_pres_tdec (Tmod m s d) = Tdec (SOME m) s (ast_to_pres_dec d)`;
+  ast_to_pres_dec (Dletrec lst) =
+    Dletrec (MAP (\(v1,v2,e).(v1, v2, ast_to_pres_exp e)) lst)
+  /\
+  ast_to_pres_dec (Dtype type_def) = Dtype type_def
+  /\
+  ast_to_pres_dec (Dtabbrev tvars typeN t) = Dtabbrev tvars typeN t
+  /\
+  ast_to_pres_dec (Dexn conN ts) = Dexn conN ts`;
 
-val ast_to_pres_def = Define `
-  (ast_to_pres tops = Top (MAP ast_to_pres_tdec tops))`;
+(* Turn top level declarations into presLang. *)
+val ast_to_pres_top_def = Define`
+  ast_to_pres_top (ast$Tdec d) = presLang$Tdec (ast_to_pres_dec d)
+  /\
+  ast_to_pres_top (Tmod m s d) = Tmod m s (MAP ast_to_pres_dec d)`;
+
+(* Turn a given full program ast into presLang.*)
+val ast_to_pres_def = Define`
+  (ast_to_pres tops = Prog (MAP ast_to_pres_top tops))`;
 
 val ast_to_json_def = Define`
   to_json p =

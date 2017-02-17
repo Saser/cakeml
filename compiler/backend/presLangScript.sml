@@ -14,10 +14,20 @@ val _ = new_theory"presLang";
 
 val _ = Datatype`
   exp =
-    | Top (exp list)
-    | Tdec (modN option) (specs option) exp
-    | Dec
-    | Empty`;
+    (* An entire program. Is divided into any number of top level declarations. *)
+    | Prog (exp list)
+    (* Top level declarations. May contain module, and spec. The exp is always a declaration. *)
+    | Tdec exp(*dec*)
+    | Tmod modN (specs option) (exp(*dec*) list)
+    (* Declarations *)
+    | Dlet exp(*pat*) exp(*exp*)
+    | Dletrec ((varN # varN # exp(*exp*)) list)
+    | Dtype type_def
+    | Dtabbrev (tvarN list) typeN t
+    | Dexn conN (t list)
+    (* TODO: Remove. This is a temporary type, to have one that terminates *)
+    | Pat
+    | Exp`;
 
 val to_json_def = tDefine "to_json"`
   to_json _ = json$Null`
