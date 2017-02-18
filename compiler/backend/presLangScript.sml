@@ -31,7 +31,11 @@ val _ = Datatype`
     | Pcon (((modN, conN) id) option) (exp(*pat*) list)
     | Pref exp(*pat*)
     | Ptannot exp(*pat*) t
-    | Exp`;
+    (* Expressions *)
+    | Raise exp
+    | Handle exp ((exp(*pat*) # exp) list)
+    | Var ((modN, varN) id)
+    | Exp`; (* Terminating *)
 
 val to_json_def = tDefine "to_json"`
   to_json _ = json$Null`

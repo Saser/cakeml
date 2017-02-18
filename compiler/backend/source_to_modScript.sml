@@ -268,8 +268,17 @@ val ast_to_pres_pat_def = tDefine "ast_to_pres_pat"`
   ast_to_pres_pat (Ptannot pat t) = Ptannot (ast_to_pres_pat pat) t`
   cheat;
 
-val ast_to_pres_exp_def = Define`
-  ast_to_pres_exp _ = Exp`;
+val ast_to_pres_exp_def = tDefine "ast_to_pres_exp"`
+  (ast_to_pres_exp (ast$Raise exp) = presLang$Raise (ast_to_pres_exp exp))
+  /\
+  (ast_to_pres_exp (Handle exp cases) =
+    let (pats, exps) = UNZIP cases in
+    let pats' = MAP ast_to_pres_pat pats in
+    let exps' = MAP ast_to_pres_exp exps in
+      Handle (ast_to_pres_exp exp) (ZIP (pats', exps')))
+  /\
+  (ast_to_pres_exp (Var v) = Var v)`
+  cheat;
 
 (* Turn declarations into presLang. *)
 val ast_to_pres_dec_def = Define`
