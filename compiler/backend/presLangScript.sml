@@ -48,7 +48,18 @@ val _ = Datatype`
     | If exp exp exp
       (* Pattern matching *)
     | Mat exp ((exp(*pat*) # exp) list)
-    | Exp`; (* Terminating *)
+      (* A let expression
+         A Nothing value for the binding indicates that this is a
+         sequencing expression, that is: (e1; e2). *)
+    | Let (varN option) exp exp
+      (* Local definition of (potentially) mutually recursive
+         functions.
+         The first varN is the function's name, and the second varN
+         is its parameter. *)
+    | Letrec ((varN # varN # exp) list) exp
+    | Tannot exp t
+      (* Location annotated expressions, not expected in source programs *)
+    | Lannot exp locn`;
 
 val to_json_def = tDefine "to_json"`
   to_json _ = json$Null`

@@ -268,14 +268,16 @@ val ast_to_pres_pat_def = tDefine "ast_to_pres_pat"`
   ast_to_pres_pat (Ptannot pat t) = Ptannot (ast_to_pres_pat pat) t`
   cheat;
 
+val zip3_def = Define`
+  (zip3 (x::xs, y::ys, z::zs) = (x,y,z)::zip3 (xs, ys, zs))
+  /\
+  (zip3 _  = [])`;
+
 val ast_to_pres_exp_def = tDefine "ast_to_pres_exp"`
   (ast_to_pres_exp (ast$Raise exp) = presLang$Raise (ast_to_pres_exp exp))
   /\
   (ast_to_pres_exp (Handle exp cases) =
-    let (pats, exps) = UNZIP cases in
-    let pats' = MAP ast_to_pres_pat pats in
-    let exps' = MAP ast_to_pres_exp exps in
-      Handle (ast_to_pres_exp exp) (ZIP (pats', exps')))
+      Handle (ast_to_pres_exp exp) (pat_exp_list_to_pres cases))
   /\
   (ast_to_pres_exp (Var v) = Var v)
   /\
@@ -287,14 +289,30 @@ val ast_to_pres_exp_def = tDefine "ast_to_pres_exp"`
   /\
   (ast_to_pres_exp (Fun varN exp) = Fun varN (ast_to_pres_exp exp))
   /\
-  (ast_to_pres_exp (Log lop exp1 exp2) = Log lop (ast_to_pres_exp exp1)
-  (ast_to_pres_exp exp2))
+  (ast_to_pres_exp (Log lop exp1 exp2) =
+    Log lop (ast_to_pres_exp exp1) (ast_to_pres_exp exp2))
   /\
   (ast_to_pres_exp (Mat exp cases) =
+    Mat (ast_to_pres_exp exp) (pat_exp_list_to_pres cases))
+  /\
+  (ast_to_pres_exp (Let varN exp1 exp2) =
+    Let varN (ast_to_pres_exp exp1) (ast_to_pres_exp exp2))
+  /\
+  (ast_to_pres_exp (Letrec vars exp) =
+    let unzip3 = FOLDR (\ (x,y,z) (xs, ys, zs).(x::xs, y::ys, z::zs)) ([],[],[]) in
+    let (vs1, vs2, exps) = unzip3 vars in
+    let exps' = MAP ast_to_pres_exp exps in
+      Letrec (zip3 (vs1,vs2,exps')) (ast_to_pres_exp exp))
+  /\
+  (ast_to_pres_exp (Tannot exp t) = Tannot (ast_to_pres_exp exp) t)
+  /\
+  (ast_to_pres_exp (Lannot exp l) = Lannot (ast_to_pres_exp exp) l)
+  /\
+  (pat_exp_list_to_pres (cases) =
     let (pats, exps) = UNZIP cases in
     let pats' = MAP ast_to_pres_pat pats in
     let exps' = MAP ast_to_pres_exp exps in
-      Handle (ast_to_pres_exp exp) (ZIP (pats', exps')))`
+      ZIP (pats', exps'))`
   cheat;
 
 (* Turn declarations into presLang. *)
