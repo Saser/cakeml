@@ -35,6 +35,18 @@ val _ = Datatype`
     | Raise exp
     | Handle exp ((exp(*pat*) # exp) list)
     | Var ((modN, varN) id)
+    | Lit lit
+      (* Constructor application.
+       A Nothing constructor indicates a tuple pattern. *)
+    | Con (((modN, conN) id) option) (exp list)
+      (* Application of a primitive operator to arguments.
+       Includes function application. *)
+    | App op (exp list)
+    | Fun varN exp
+      (* Logical operations (and, or) *)
+    | Log lop exp exp
+    | If exp exp exp
+    | Mat exp ((exp(*pat*) # exp) list)
     | Exp`; (* Terminating *)
 
 val to_json_def = tDefine "to_json"`

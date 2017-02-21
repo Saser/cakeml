@@ -277,7 +277,24 @@ val ast_to_pres_exp_def = tDefine "ast_to_pres_exp"`
     let exps' = MAP ast_to_pres_exp exps in
       Handle (ast_to_pres_exp exp) (ZIP (pats', exps')))
   /\
-  (ast_to_pres_exp (Var v) = Var v)`
+  (ast_to_pres_exp (Var v) = Var v)
+  /\
+  (ast_to_pres_exp (Lit l) = Lit l)
+  /\
+  (ast_to_pres_exp (Con con exps) = Con con (MAP ast_to_pres_exp exps))
+  /\
+  (ast_to_pres_exp (App op exps) = App op (MAP ast_to_pres_exp exps))
+  /\
+  (ast_to_pres_exp (Fun varN exp) = Fun varN (ast_to_pres_exp exp))
+  /\
+  (ast_to_pres_exp (Log lop exp1 exp2) = Log lop (ast_to_pres_exp exp1)
+  (ast_to_pres_exp exp2))
+  /\
+  (ast_to_pres_exp (Mat exp cases) =
+    let (pats, exps) = UNZIP cases in
+    let pats' = MAP ast_to_pres_pat pats in
+    let exps' = MAP ast_to_pres_exp exps in
+      Handle (ast_to_pres_exp exp) (ZIP (pats', exps')))`
   cheat;
 
 (* Turn declarations into presLang. *)
