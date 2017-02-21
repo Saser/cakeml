@@ -15,7 +15,7 @@ val _ = new_theory"presLang";
 val _ = Datatype`
   exp =
     (* An entire program. Is divided into any number of top level declarations. *)
-    | Prog (exp list)
+    | Prog (exp(*top*) list)
     (* Top level declarations. May contain module, and spec. The exp is always a declaration. *)
     | Tdec exp(*dec*)
     | Tmod modN (specs option) (exp(*dec*) list)
