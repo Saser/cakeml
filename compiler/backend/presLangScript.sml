@@ -46,6 +46,7 @@ val _ = Datatype`
       (* Logical operations (and, or) *)
     | Log lop exp exp
     | If exp exp exp
+      (* Pattern matching *)
     | Mat exp ((exp(*pat*) # exp) list)
     | Exp`; (* Terminating *)
 
