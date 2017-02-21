@@ -339,12 +339,9 @@ val ast_to_pres_def = Define`
   (ast_to_pres tops = Prog (MAP ast_to_pres_top tops))`;
 
 val ast_to_json_def = Define`
-  to_json p =
+  ast_to_json p =
     json$Object [
                   ("lang", json$String "ast");
                   ("prog", presLang$to_json (ast_to_pres p))]`;
-
-val ast_to_json_def = Define`
-  ast_to_json _ = json$String "Hello, Ast!"`
 
 val _ = export_theory();

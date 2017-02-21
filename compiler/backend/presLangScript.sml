@@ -61,6 +61,7 @@ val _ = Datatype`
       (* Location annotated expressions, not expected in source programs *)
     | Lannot exp locn`;
 
+(* TODO: Implement to_json based on presLang structure. *)
 val to_json_def = tDefine "to_json"`
   to_json _ = json$Null`
   cheat;
