@@ -10,7 +10,7 @@ open jsonTheory
 val _ = Define`
   parse p = parse_prog (MAP FST (lexer_fun p))`;
 val _ = Define`
-  basic_prog = "1; val (x,y) = let val my1 = 1 in (3 + 5, my1) end; fun foo(x:int) = [x,x,x]; val x = (3); exception ExplorerException of string; fun mk_ref(x,v) = x := v"`;
+  basic_prog = "1; val (x,y) = let val my1 = 1 in (3 + 5 mod 10, my1) end; fun foo(x:int) = [x,x,x]; val x = String.size \"bob\"; exception ExplorerException of string; fun mk_ref(x,v) = x := v"`;
 val _ = Define`
   parsed_basic =
     case parse basic_prog of
