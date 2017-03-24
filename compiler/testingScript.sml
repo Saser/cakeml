@@ -1,5 +1,5 @@
-load "compilerTheory"
-load "lexer_funTheory"
+load "compilerTheory";
+load "lexer_funTheory";
 open preamble
      lexer_funTheory
      cmlParseTheory
@@ -16,7 +16,7 @@ val parse_def = Define`
 
 (* Basic string representation of a program. *)
 val basic_prog_def = Define`
-  basic_prog = "val x = 3 + 5"`;
+  basic_prog = "val x = 3 + 5;"`;
 
 (* The input program, parsed *)
 val parsed_basic_def = Define`
@@ -24,6 +24,17 @@ val parsed_basic_def = Define`
     case parse basic_prog of
          NONE => []
        | SOME x => x`;
+
+(* If parsing breaks, we can use the pre-parsed program for testing. Note that
+* it lacks traces *)
+val parsed_basic_def = Define`
+  parsed_basic = [Tdec
+      (Dlet (Pcon NONE [Pvar "x"; Pvar "y"])
+         (Con NONE
+            [App Opapp
+               [App Opapp [Var (Short "+"); Lit (IntLit 3)];
+                Lit (IntLit 5)]; Lit (IntLit 1)]));
+    Tdec (Dlet (Pvar "y") (Lit (StrLit "hello")))]`;
 
 EVAL ``parsed_basic``;
 
