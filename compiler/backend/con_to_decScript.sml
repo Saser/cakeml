@@ -22,12 +22,12 @@ val _ = Define `
   (init_global_funs tra tidx next [] = Con (mk_cons tra tidx) NONE [])
   ∧
   (init_global_funs tra tidx next ((f,x,e)::funs) =
-   Let (mk_cons tra tidx) NONE (App (mk_cons tra (tidx+1)) (Init_global_var next) [Fun (mk_cons tra tidx+2) x e]) (init_global_funs tra (tidx+3) (next+1) funs))`;
+   Let (mk_cons tra tidx) NONE (App (mk_cons tra (tidx+1)) (Init_global_var next) [Fun (mk_cons tra (tidx+2)) x e]) (init_global_funs tra (tidx+3) (next+1) funs))`;
 (*TODO: We should check whether introducing a trace to Dletrec and is sensible, in
   * that case we should change from passing on Empty into init_global_funs to
   * the correct trace *)
 val _ = Define `
-  (compile_decs next [] = Con NONE [])
+  (compile_decs next [] = Con Empty NONE [])
   ∧
   (compile_decs next (d::ds) =
    case d of
@@ -48,14 +48,14 @@ val _ = Define `
     | Prompt ds =>
       let n = (num_defs ds) in
         (next+n,
-         Let Empty NONE (Extend_global n)
+         Let Empty NONE (Extend_global Empty n)
            (Handle Empty (Let Empty NONE (compile_decs next ds)
                      (Con Empty (SOME none_tag) []))
              [(Pvar "x",
                Con Empty (SOME some_tag) [Var_local Empty "x"])])))`;
 
 val _ = Define`
-  (compile_prog none_tag some_tag next [] = (next, Con (SOME none_tag) []))
+  (compile_prog none_tag some_tag next [] = (next, Con Empty (SOME none_tag) []))
   ∧
   (compile_prog none_tag some_tag next (p::ps) =
    let (next',p') = compile_prompt none_tag some_tag next p in
