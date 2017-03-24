@@ -1,9 +1,10 @@
+load "compilerTheory"
+load "lexer_funTheory"
 open preamble
      lexer_funTheory
      cmlParseTheory
      inferTheory
      backendTheory
-     basisProgTheory
 open jsonTheory presLangTheory
 open astTheory source_to_modTheory
 
