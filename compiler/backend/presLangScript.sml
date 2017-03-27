@@ -132,10 +132,24 @@ val mod_to_pres_def = Define`
   mod_to_pres prompts = Prog (MAP mod_to_pres_prompt prompts)`;
 
 (* con_to_pres *)
+val con_to_pres_pat_def = Define`
+  con_to_pres_pat p =
+    case p of
+       | conLang$Pvar varN => presLang$Pvar varN
+       | _ => Pvar "x"`;
+
 val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   (con_to_pres_exp (conLang$Raise t e) = Raise t (con_to_pres_exp e))
   /\ 
-  (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))`
+  (con_to_pres_exp (Handle t e pes) = Handle t (con_to_pres_exp e)
+  (con_to_pres_pes pes))
+  /\
+  (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))
+  /\
+  (con_to_pres_pes [] = [])
+  /\
+  (con_to_pres_pes ((p,e)::pes) =
+    (con_to_pres_pat p, con_to_pres_exp e)::con_to_pres_pes pes)`
   cheat; 
 
 val con_to_pres_dec_def = Define`
