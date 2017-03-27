@@ -33,7 +33,7 @@ val _ = Datatype`
     | Pvar varN
     | Plit lit
     | ModPcon (((modN, conN) id) option) (exp(*pat*) list)
-    | ConPcon ((num # tid_or_exn) option) (pat list)
+    | ConPcon ((num # tid_or_exn) option) (exp(*pat*) list)
     | Pref exp(*pat*)
     | Ptannot exp(*pat*) t
     (* Expressions *)
@@ -139,7 +139,10 @@ val mod_to_pres_def = Define`
 val con_to_pres_pat_def = tDefine"con_to_pres_pat"`
   con_to_pres_pat p =
     case p of
-       | conLang$Pvar varN => presLang$Pvar varN`
+       | conLang$Pvar varN => presLang$Pvar varN
+       | Plit lit => Plit lit
+       | Pcon opt ps => ConPcon opt (MAP con_to_pres_pat ps)
+       | Pref pat => Pref (con_to_pres_pat pat)`
     cheat;
 
 val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
