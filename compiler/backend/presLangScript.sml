@@ -143,9 +143,13 @@ val con_to_pres_pat_def = tDefine"con_to_pres_pat"`
 val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   (con_to_pres_exp (conLang$Raise t e) = Raise t (con_to_pres_exp e))
   /\ 
-  (con_to_pres_exp (Handle t e pes) = Handle t (con_to_pres_exp e)
-  (con_to_pres_pes pes))
+  (con_to_pres_exp (Handle t e pes) = Handle t (con_to_pres_exp e) (con_to_pres_pes pes))
   /\
+  (con_to_pres_exp (Lit t l) = Lit t l)
+  /\
+  (con_to_pres_exp (Con t ntOpt exps) = ConCon t ntOpt (MAP con_to_pres_exp
+  exps))
+  /\ 
   (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))
   /\
   (con_to_pres_pes [] = [])
