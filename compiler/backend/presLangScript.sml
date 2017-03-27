@@ -227,6 +227,10 @@ val word_size_to_json_def = Define`
   (word_size_to_json W64 = String "W64")`
 
 val op_to_json_def = Define`
+  (op_to_json (Conlang (Init_global_var num)) = String "Init_global_var")
+  /\
+  (op_to_json (Conlang (Op astop)) = op_to_json (Ast (astop)))
+  /\
   (op_to_json (Ast (Opn Plus)) = String "Plus")
   /\
   (op_to_json (Ast (Opn Minus)) = String "Minus")
