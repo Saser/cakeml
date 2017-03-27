@@ -132,8 +132,11 @@ val mod_to_pres_def = Define`
   mod_to_pres prompts = Prog (MAP mod_to_pres_prompt prompts)`;
 
 (* con_to_pres *)
-val con_to_pres_exp_def = Define`
-  con_to_pres_exp _ = presLang$Lit Empty (IntLit 5)`; 
+val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
+  (con_to_pres_exp (conLang$Raise t e) = Raise t (con_to_pres_exp e))
+  /\ 
+  (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))`
+  cheat; 
 
 val con_to_pres_dec_def = Define`
   con_to_pres_dec d =
