@@ -159,6 +159,8 @@ val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   /\
   (con_to_pres_exp (App t op exps) = App t (Conlang op) (MAP con_to_pres_exp exps))
   /\
+  (con_to_pres_exp (Mat t e pes) = Mat t (con_to_pres_exp e) (con_to_pres_pes pes))
+  /\
   (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))
   /\
   (con_to_pres_pes [] = [])
