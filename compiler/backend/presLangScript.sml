@@ -154,6 +154,8 @@ val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   /\
   (con_to_pres_exp (Var_global t num) = Var_global t num)
   /\
+  (con_to_pres_exp (Fun t varN e) = Fun t varN (con_to_pres_exp e))
+  /\
   (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))
   /\
   (con_to_pres_pes [] = [])

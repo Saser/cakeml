@@ -8,7 +8,13 @@ open preamble
 open jsonTheory presLangTheory
 open astTheory source_to_modTheory
 open mod_to_conTheory
-
+open conLangTheory
+type_of ``con_to_pres_pat``
+type_of ``con_to_pres_exp``
+type_of ``con_to_pres_dec``
+type_of ``con_to_pres_prompt``
+type_of ``con_to_pres``
+type_of ``conLang$Con``
 val _ = computeLib.add_funs [pat_bindings_def];
 
 (* COMPILING *)
