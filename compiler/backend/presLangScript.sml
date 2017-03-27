@@ -161,6 +161,9 @@ val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   /\
   (con_to_pres_exp (Mat t e pes) = Mat t (con_to_pres_exp e) (con_to_pres_pes pes))
   /\
+  (con_to_pres_exp (Let t varN e1 e2) = Let t varN (con_to_pres_exp e1)
+  (con_to_pres_exp e2))
+  /\ 
   (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))
   /\
   (con_to_pres_pes [] = [])
