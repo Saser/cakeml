@@ -1,5 +1,5 @@
 open preamble astTheory jsonTheory backend_commonTheory;
-open modLangTheory;
+open conLangTheory modLangTheory;
 
 val _ = new_theory"presLang";
 
@@ -28,10 +28,11 @@ val _ = Datatype`
     | Dletrec ((varN # varN # exp(*exp*)) list)
     | Dtype (modN list)
     | Dexn (modN list) conN (t list)
-    (* Patterns *)
+    (* TODO: Consider doing what we did with op above for the patterns below*)
     | Pvar varN
     | Plit lit
-    | Pcon (((modN, conN) id) option) (exp(*pat*) list)
+    | ModPcon (((modN, conN) id) option) (exp(*pat*) list)
+    | ConPcon ((num # tid_or_exn) option) (pat list)
     | Pref exp(*pat*)
     | Ptannot exp(*pat*) t
     (* Expressions *)
@@ -42,7 +43,8 @@ val _ = Datatype`
     | Lit tra lit
       (* Constructor application.
        A Nothing constructor indicates a tuple pattern. *)
-    | Con tra (((modN, conN) id) option) (exp list)
+    | ModCon tra (((modN, conN) id) option) (exp list)
+    | ConCon tra ((num # tid_or_exn) option) (exp list)
       (* Application of a primitive operator to arguments.
        Includes function application. *)
     | App tra op (exp list)
@@ -71,7 +73,7 @@ val mod_to_pres_pat_def = tDefine "mod_to_pres_pat"`
     case p of
        | ast$Pvar varN => presLang$Pvar varN
        | Plit lit => Plit lit
-       | Pcon id pats => Pcon id (MAP mod_to_pres_pat pats)
+       | Pcon id pats => ModPcon id (MAP mod_to_pres_pat pats)
        | Pref pat => Pref (mod_to_pres_pat pat)
        (* Won't happen, these are removed in compilation from source to mod. *)
        | Ptannot pat t => Ptannot (mod_to_pres_pat pat) t`
@@ -85,7 +87,7 @@ val mod_to_pres_exp_def = tDefine"mod_to_pres_exp"`
   /\
   (mod_to_pres_exp (Lit tra lit) = Lit tra lit)
   /\
-  (mod_to_pres_exp (Con tra id_opt exps) = Con tra id_opt (MAP mod_to_pres_exp exps))
+  (mod_to_pres_exp (Con tra id_opt exps) = ModCon tra id_opt (MAP mod_to_pres_exp exps))
   /\
   (mod_to_pres_exp (Var_local tra varN) = Var_local tra varN)
   /\
@@ -132,11 +134,11 @@ val mod_to_pres_def = Define`
   mod_to_pres prompts = Prog (MAP mod_to_pres_prompt prompts)`;
 
 (* con_to_pres *)
-val con_to_pres_pat_def = Define`
+val con_to_pres_pat_def = tDefine"con_to_pres_pat"`
   con_to_pres_pat p =
     case p of
-       | conLang$Pvar varN => presLang$Pvar varN
-       | _ => Pvar "x"`;
+       | conLang$Pvar varN => presLang$Pvar varN`
+    cheat;
 
 val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   (con_to_pres_exp (conLang$Raise t e) = Raise t (con_to_pres_exp e))
@@ -165,7 +167,7 @@ val con_to_pres_def = Define`
   con_to_pres prompts = Prog (MAP con_to_pres_prompt prompts)`;
 
 (* pres_to_json *)
-(* TODO: Add words *)
+(* TODO: Add words, add ConCon and ConPcon *)
 val lit_to_value_def = Define`
   (lit_to_value (IntLit i) = Int i)
   /\
@@ -390,13 +392,13 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json (Plit lit) =
       new_obj "Plit" [("pat", Object[lit_to_json lit])])
   /\
-  (pres_to_json (Pcon optTup exps) =
+  (pres_to_json (ModPcon optTup exps) =
     let exps' = ("pat", Array (MAP pres_to_json exps)) in
     let ids' = case optTup of
                   | NONE => ("modscon", Null)
                   | SOME optUp' => ("modscon", (id_to_object optUp')) in
 
-      new_obj "Pcon" [ids';exps'])
+      new_obj "Pcon-modlang" [ids';exps'])
   /\
   (pres_to_json (Pref exp) =
       new_obj "Pref" [("pat", pres_to_json exp)])
@@ -422,12 +424,12 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json (Lit tra lit) =
       new_obj "Lit" [("tra", trace_to_json tra);lit_to_json lit])
   /\
-  (pres_to_json (Con tra optTup exps) =
+  (pres_to_json (ModCon tra optTup exps) =
     let exps' = ("exps", Array (MAP pres_to_json exps)) in
     let ids' = case optTup of
                   | NONE => ("modscon", Null)
                   | SOME optUp' => ("modscon", (id_to_object optUp')) in
-      new_obj "Con" [("tra", trace_to_json tra);ids';exps'])
+      new_obj "Con-modlang" [("tra", trace_to_json tra);ids';exps'])
   /\
   (pres_to_json (App tra op exps) =
     let exps' = ("exps", Array (MAP pres_to_json exps)) in
