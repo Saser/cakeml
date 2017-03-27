@@ -41,6 +41,7 @@ val _ = Datatype`
     | Handle tra exp ((exp(*pat*) # exp) list)
     | Var_local tra varN
     | Var_global tra num
+    | Extend_global tra num (* Introduced in conLang *)
     | Lit tra lit
       (* Constructor application.
        A Nothing constructor indicates a tuple pattern. *)
@@ -164,8 +165,10 @@ val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   (con_to_pres_exp (Let t varN e1 e2) = Let t varN (con_to_pres_exp e1)
   (con_to_pres_exp e2))
   /\ 
-  (con_to_pres_exp _ = presLang$Lit Empty (IntLit 5))
+  (con_to_pres_exp (Letrec t funs e) = Letrec t (MAP (\(v1,v2,e).(v1,v2,con_to_pres_exp e)) funs) (con_to_pres_exp e))
   /\
+  (con_to_pres_exp (Extend_global t num) = Extend_global t num)
+  /\ 
   (con_to_pres_pes [] = [])
   /\
   (con_to_pres_pes ((p,e)::pes) =
@@ -179,7 +182,7 @@ val con_to_pres_dec_def = Define`
        | Dletrec funs => Dletrec (MAP (\(v1,v2,e). (v1,v2,con_to_pres_exp e)) funs)`; 
 
 val con_to_pres_prompt_def = Define`
-  con_to_pres_prompt decs = Prompt NONE (MAP con_to_pres_dec decs)`;
+  con_to_pres_prompt (Prompt decs) = Prompt NONE (MAP con_to_pres_dec decs)`;
 
 val con_to_pres_def = Define`
   con_to_pres prompts = Prog (MAP con_to_pres_prompt prompts)`;
