@@ -131,6 +131,22 @@ val mod_to_pres_prompt_def = Define`
 val mod_to_pres_def = Define`
   mod_to_pres prompts = Prog (MAP mod_to_pres_prompt prompts)`;
 
+(* con_to_pres *)
+val con_to_pres_exp_def = Define`
+  con_to_pres_exp _ = presLang$Lit Empty (IntLit 5)`; 
+
+val con_to_pres_dec_def = Define`
+  con_to_pres_dec d =
+    case d of
+       | conLang$Dlet num exp => presLang$Dlet num (con_to_pres_exp exp)
+       | Dletrec funs => Dletrec (MAP (\(v1,v2,e). (v1,v2,con_to_pres_exp e)) funs)`; 
+
+val con_to_pres_prompt_def = Define`
+  con_to_pres_prompt decs = Prompt NONE (MAP con_to_pres_dec decs)`;
+
+val con_to_pres_def = Define`
+  con_to_pres prompts = Prog (MAP con_to_pres_prompt prompts)`;
+
 (* pres_to_json *)
 (* TODO: Add words *)
 val lit_to_value_def = Define`
