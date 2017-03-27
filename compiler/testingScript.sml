@@ -7,6 +7,7 @@ open preamble
      backendTheory
 open jsonTheory presLangTheory
 open astTheory source_to_modTheory
+open mod_to_conTheory
 
 val _ = computeLib.add_funs [pat_bindings_def];
 
@@ -43,6 +44,9 @@ val mod_prog_def = Define`
   mod_prog = SND (source_to_mod$compile source_to_mod$empty_config parsed_basic)`;
 
 EVAL ``mod_prog``;
+val con_prog_def = Define`
+  con_prog = SND (mod_to_con$compile  mod_to_con$empty_config mod_prog)`;
+EVAL ``con_prog``;
 (* Test running the compiler backend on the basic program *)
 EVAL ``backend$compile_explorer backend$prim_config parsed_basic``;
 
