@@ -369,7 +369,7 @@ val t_to_json_def = tDefine"t_to_json"`
   (t_to_json (Tapp ts tctor) = Object [("Tapp", Array (MAP t_to_json ts));
   ("tctor", tctor_to_json tctor)])`
   cheat;
-
+(*TODO: Update lits to be f.e Cons: IntLit, Val: 3 *)
 val lit_to_json_def = Define`
   (lit_to_json (IntLit i) = ("IntLit", Int i))
   /\
