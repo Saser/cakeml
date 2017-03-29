@@ -63,7 +63,7 @@ fun explorer q fileN =
   in ()
   end
 
-
+explorer `val x = 1+2;` "test.dat"
 (* PRESLANG *)
 (* Test converting mod to pres *)
 EVAL ``mod_to_pres mod_prog``;
@@ -74,7 +74,7 @@ EVAL ``pres_to_json (mod_to_pres mod_prog)``;
 EVAL ``pres_to_json (con_to_pres con_prog)``;
 (* Test converting json to string *)
 EVAL ``json_to_string (pres_to_json (mod_to_pres mod_prog))``;
-
+EVAL ``append (json_to_string (pres_to_json (con_to_pres con_prog)))``;
 (* Unit test JSON *)
 val _ = Define `
   json =
