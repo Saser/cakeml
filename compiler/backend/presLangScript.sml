@@ -435,12 +435,22 @@ val pres_to_json_def = tDefine"pres_to_json"`
       new_obj "Plit" [("pat", Object[lit_to_json lit])])
   /\
   (pres_to_json (ModPcon optTup exps) =
-    let exps' = ("pat", Array (MAP pres_to_json exps)) in
+    let exps' = ("pats", Array (MAP pres_to_json exps)) in
     let ids' = case optTup of
                   | NONE => ("modscon", Null)
                   | SOME optUp' => ("modscon", (id_to_object optUp')) in
-
       new_obj "Pcon-modlang" [ids';exps'])
+  /\
+  (pres_to_json (ConPcon optTup exps) =
+    let exps' = Array (MAP pres_to_json exps) in 
+    let tup' = case optTup of
+                  | NONE => Null
+                  | SOME (num, te) => case te of
+                      | TypeId id => Array [num_to_json num; new_obj "TypeId"
+                      [("id", id_to_object id)]]
+                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn"
+                      [("id", id_to_object id)]] in
+      new_obj "Pcon-conlang" [("numtid",tup');("pats", exps')])
   /\
   (pres_to_json (Pref exp) =
       new_obj "Pref" [("pat", pres_to_json exp)])
