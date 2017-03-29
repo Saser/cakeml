@@ -62,8 +62,9 @@ fun explorer q fileN =
       val _ = TextIO.closeOut f
   in ()
   end
-
+(*Sample usage of explorer-function, saving to test.dat *)
 explorer `val x = 1+2;` "test.dat"
+
 (* PRESLANG *)
 (* Test converting mod to pres *)
 EVAL ``mod_to_pres mod_prog``;
