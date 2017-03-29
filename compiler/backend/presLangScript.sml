@@ -473,6 +473,10 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json (Var_global tra num) =
       new_obj "Var_global" [("tra", trace_to_json tra);("num", num_to_json num)])
   /\
+  (pres_to_json (Extend_global tra num) =
+      new_obj "Extend_global" [("tra", trace_to_json tra);("num", num_to_json
+      num)])
+  /\ 
   (pres_to_json (Lit tra lit) =
       new_obj "Lit" [("tra", trace_to_json tra);lit_to_json lit])
   /\
