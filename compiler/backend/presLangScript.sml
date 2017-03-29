@@ -487,6 +487,17 @@ val pres_to_json_def = tDefine"pres_to_json"`
                   | SOME optUp' => ("modscon", (id_to_object optUp')) in
       new_obj "Con-modlang" [("tra", trace_to_json tra);ids';exps'])
   /\
+  (pres_to_json (ConCon tra optTup exps) =
+    let exps' = Array (MAP pres_to_json exps) in
+    let tup' = case optTup of
+                  | NONE => Null
+                  | SOME (num, te) => case te of
+                      | TypeId id => Array [num_to_json num; new_obj "TypeId"
+                      [("id", id_to_object id)]]
+                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn"
+                      [("id", id_to_object id)]] in
+      new_obj "Con-conlang" [("tra", trace_to_json tra);("numtid",tup');("pats", exps')])
+  /\
   (pres_to_json (App tra op exps) =
     let exps' = ("exps", Array (MAP pres_to_json exps)) in
       new_obj "App" [("tra", trace_to_json tra);("op", op_to_json op);exps'])
