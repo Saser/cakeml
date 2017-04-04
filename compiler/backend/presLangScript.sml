@@ -227,7 +227,7 @@ val trace_to_json_def = Define`
 val word_size_to_json_def = Define`
   (word_size_to_json W8 = String "W8")
   /\
-  (word_size_to_json W64 = String "W64")`
+  (word_size_to_json W64 = String "W64")`;
 
 val op_to_json_def = Define`
   (op_to_json (Conlang (Init_global_var num)) = String "Init_global_var")
