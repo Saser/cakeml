@@ -229,98 +229,117 @@ val word_size_to_json_def = Define`
   /\
   (word_size_to_json W64 = String "W64")`;
 
+val opn_to_json_def = Define`
+  (opn_to_json Plus = new_obj "Plus" [])
+  /\
+  (opn_to_json Minus = new_obj "Minus" [])
+  /\
+  (opn_to_json Times = new_obj "Times" [])
+  /\
+  (opn_to_json Divide = new_obj "Divide" [])
+  /\
+  (opn_to_json Modulo = new_obj "Modulo" [])`;
+
+val opb_to_json_def = Define`
+  (opb_to_json Lt = new_obj "Lt" [])
+  /\
+  (opb_to_json Gt = new_obj "Gt" [])
+  /\
+  (opb_to_json Leq = new_obj "Leq" [])
+  /\
+  (opb_to_json Geq = new_obj "Geq" [])`;
+
+val opw_to_json_def = Define`
+  (opw_to_json Andw = new_obj "Andw" [])
+  /\
+  (opw_to_json Orw = new_obj "Orw" [])
+  /\
+  (opw_to_json Xor = new_obj "Xor" [])
+  /\
+  (opw_to_json Add = new_obj "Add" [])
+  /\
+  (opw_to_json Sub = new_obj "Sub" [])`;
+
+val shift_to_json_def = Define`
+  (shift_to_json Lsl = new_obj "Andw" [])
+  /\
+  (shift_to_json Lsr = new_obj "Orw" [])
+  /\
+  (shift_to_json Asr = new_obj "Xor" [])`;
+
 val op_to_json_def = Define`
-  (op_to_json (Conlang (Init_global_var num)) = String "Init_global_var")
+  (op_to_json (Conlang (Init_global_var num)) = new_obj "Init_global_var" [("num", num_to_json num)])
   /\
-  (op_to_json (Conlang (Op astop)) = op_to_json (Ast (astop)))
+  (op_to_json (Conlang (Op astop)) = new_obj "Op" [("op", op_to_json (Ast (astop)))])
   /\
-  (op_to_json (Ast (Opn Plus)) = String "Plus")
+  (op_to_json (Ast (Opn opn)) = new_obj "Opn" [("opn", opn_to_json opn)])
   /\
-  (op_to_json (Ast (Opn Minus)) = String "Minus")
+  (op_to_json (Ast (Opb opb)) = new_obj "Opb" [("opb", opb_to_json opb)])
   /\
-  (op_to_json (Ast (Opn Times)) = String "Times")
+  (op_to_json (Ast (Opw word_size opw)) = new_obj "Opw" [
+    ("word_size", word_size_to_json word_size);
+    ("opw", opw_to_json opw)
+  ])
   /\
-  (op_to_json (Ast (Opn Divide)) = String "Divide")
+  (op_to_json (Ast (Shift word_size shift num)) = new_obj "Shift" [
+    ("word_size", word_size_to_json word_size);
+    ("shift", shift_to_json shift);
+    ("num", num_to_json num)
+  ])
   /\
-  (op_to_json (Ast (Opn Modulo)) = String "Modulo")
+  (op_to_json (Ast Equality) = new_obj "Equality" [])
   /\
-  (op_to_json (Ast (Opb Lt)) = String "Lt")
+  (op_to_json (Ast Opapp) = new_obj "Opapp" [])
   /\
-  (op_to_json (Ast (Opb Gt)) = String "Gt")
+  (op_to_json (Ast Opassign) = new_obj "Opassign" [])
   /\
-  (op_to_json (Ast (Opb Leq)) = String "Leq")
+  (op_to_json (Ast Oprep) = new_obj "Oprep" [])
   /\
-  (op_to_json (Ast (Opb Geq)) = String "Geq")
+  (op_to_json (Ast Opderep) = new_obj "Opderep" [])
   /\
-  (op_to_json (Ast (Opw wordS Andw)) = Array [(word_size_to_json wordS); (String "Andw")])
+  (op_to_json (Ast Aw8alloc) = new_obj "Aw8alloc" [])
   /\
-  (op_to_json (Ast (Opw wordS Orw)) = Array [(word_size_to_json wordS); (String "Orw")])
+  (op_to_json (Ast Aw8sub) = new_obj "Aw8sub" [])
   /\
-  (op_to_json (Ast (Opw wordS Xor)) = Array [(word_size_to_json wordS); (String "Xor")])
+  (op_to_json (Ast Aw8length) = new_obj "Aw8length" [])
   /\
-  (op_to_json (Ast (Opw wordS Add)) = Array [(word_size_to_json wordS); (String "Add")])
+  (op_to_json (Ast Aw8update) = new_obj "Aw8update" [])
   /\
-  (op_to_json (Ast (Opw wordS Sub)) = Array [(word_size_to_json wordS); (String
-  "Sub")])
+  (op_to_json (Ast (WordFromInt word_size)) = new_obj "WordFromInt" [
+    ("word_size", word_size_to_json word_size)
+  ])
   /\
-  (op_to_json (Ast (Shift wordS Lsl num)) = Array [(word_size_to_json wordS);
-  (String "Lsl"); (num_to_json num)])
+  (op_to_json (Ast (WordToInt word_size)) = new_obj "WordToInt" [
+    ("word_size", word_size_to_json word_size)
+  ])
   /\
-  (op_to_json (Ast (Shift wordS Lsr num)) = Array [(word_size_to_json wordS); (String "Lsr"); (num_to_json num)])
+  (op_to_json (Ast Ord) = new_obj "Ord" [])
   /\
-  (op_to_json (Ast (Shift wordS Asr num)) = Array [(word_size_to_json wordS);
-  (String "Asr"); (num_to_json num)])
+  (op_to_json (Ast Chr) = new_obj "Chr" [])
   /\
-  (op_to_json (Ast Equality) = String "Equality")
+  (op_to_json (Ast (Chopb opb)) = new_obj "Chopb" [("op", opb_to_json opb)])
   /\
-  (op_to_json (Ast Opapp) = String "Opapp")
+  (op_to_json (Ast Implode) = new_obj "Implode" [])
   /\
-  (op_to_json (Ast Opassign) = String "Opassign")
+  (op_to_json (Ast Strsub) = new_obj "Strsub" [])
   /\
-  (op_to_json (Ast Oprep) = String "Oprep")
+  (op_to_json (Ast Strlen) = new_obj "Strlen" [])
   /\
-  (op_to_json (Ast Opderep) = String "Opderep")
+  (op_to_json (Ast VfromList) = new_obj "VfromList" [])
   /\
-  (op_to_json (Ast Aw8alloc) = String "Aw8alloc")
+  (op_to_json (Ast Vsub) = new_obj "Vsub" [])
   /\
-  (op_to_json (Ast Aw8sub) = String "Aw8sub")
+  (op_to_json (Ast Vlength) = new_obj "Vlength" [])
   /\
-  (op_to_json (Ast Aw8length) = String "Aw8length")
+  (op_to_json (Ast Aalloc) = new_obj "Aalloc" [])
   /\
-  (op_to_json (Ast Aw8update) = String "Aw8update")
+  (op_to_json (Ast Asub) = new_obj "Asub" [])
   /\
-  (op_to_json (Ast (WordFromInt wordS)) = Array [(String "WordFromInt");(word_size_to_json wordS)])
+  (op_to_json (Ast Alength) = new_obj "Alength" [])
   /\
-  (op_to_json (Ast (WordToInt wordS)) = Array [(String "WordToInt");(word_size_to_json wordS)])
+  (op_to_json (Ast Aupdate) = new_obj "Aupdate" [])
   /\
-  (op_to_json (Ast Ord) = String "Ord")
-  /\
-  (op_to_json (Ast Chr) = String "Chr")
-  /\
-  (op_to_json (Ast (Chopb opb)) = Array [(String "Chopb");op_to_json (Ast (Opb
-  opb))])
-  /\
-  (op_to_json (Ast Implode) = String "Implode")
-  /\
-  (op_to_json (Ast Strsub) = String "Strsub")
-  /\
-  (op_to_json (Ast Strlen) = String "Strlen")
-  /\
-  (op_to_json (Ast VfromList) = String "VfromList")
-  /\
-  (op_to_json (Ast Vsub) = String "Vsub")
-  /\
-  (op_to_json (Ast Vlength) = String "Vlength")
-  /\
-  (op_to_json (Ast Aalloc) = String "Aalloc")
-  /\
-  (op_to_json (Ast Asub) = String "Asub")
-  /\
-  (op_to_json (Ast Alength) = String "Alength")
-  /\
-  (op_to_json (Ast Aupdate) = String "Aupdate")
-  /\
-  (op_to_json (Ast (FFI str)) = Array [(String "FFI");(String str)])`;
+  (op_to_json (Ast (FFI str)) = new_obj "FFI" [("str", String str)])`;
 
 val lop_to_json_def = Define`
   (lop_to_json ast$And = String "And")
