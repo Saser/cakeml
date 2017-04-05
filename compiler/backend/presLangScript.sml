@@ -191,17 +191,6 @@ val con_to_pres_prompt_def = Define`
 val con_to_pres_def = Define`
   con_to_pres prompts = Prog (MAP con_to_pres_prompt prompts)`;
 
-(* pres_to_json *)
-(* TODO: Add words *)
-val lit_to_value_def = Define`
-  (lit_to_value (IntLit i) = Int i)
-  /\
-  (lit_to_value (Char c) = String [c])
-  /\
-  (lit_to_value (StrLit s) = String s)
-  /\
-  (lit_to_value _ = String "word8/64")`;
-
 (* Create a new json$Object with keys and values as in the tuples. Every object
 * has constructor name field, cons *)
 val new_obj_def = Define`
@@ -405,17 +394,16 @@ val num_to_hex_def = Define `
 val word_to_hex_string_def = Define `
   word_to_hex_string w = "0x" ++ num_to_hex (w2n (w:'a word))`;
 
-(*TODO: Update lits to be f.e Cons: IntLit, Val: 3 *)
 val lit_to_json_def = Define`
-  (lit_to_json (IntLit i) = ("IntLit", Int i))
+  (lit_to_json (IntLit i) = new_obj "IntLit" [("value", Int i)])
   /\
-  (lit_to_json (Char c) = ("Char", String (c::"")))
+  (lit_to_json (Char c) = new_obj "Char" [("value", String [c])])
   /\
-  (lit_to_json (StrLit s) = ("StrLit", String s))
+  (lit_to_json (StrLit s) = new_obj "StrLit" [("value", String s)])
   /\
-  (lit_to_json (Word8 w) = ("word8", String (word_to_hex_string w)))
+  (lit_to_json (Word8 w) = new_obj "Word8" [("value", String (word_to_hex_string w))])
   /\
-  (lit_to_json (Word64 w) = ("word64", String (word_to_hex_string w)))`
+  (lit_to_json (Word64 w) = new_obj "Word64" [("value",  String (word_to_hex_string w))])`
 
 val option_to_json_def = Define`
   (option_to_json opt = case opt of
@@ -454,7 +442,7 @@ val pres_to_json_def = tDefine"pres_to_json"`
       new_obj "Pvar" [("pat", Object[("var",String varN)])])
   /\
   (pres_to_json (Plit lit) =
-      new_obj "Plit" [("pat", Object[lit_to_json lit])])
+      new_obj "Plit" [("lit", lit_to_json lit)])
   /\
   (pres_to_json (ModPcon optTup exps) =
     let exps' = ("pats", Array (MAP pres_to_json exps)) in
@@ -500,7 +488,7 @@ val pres_to_json_def = tDefine"pres_to_json"`
       num)])
   /\ 
   (pres_to_json (Lit tra lit) =
-      new_obj "Lit" [("tra", trace_to_json tra);lit_to_json lit])
+      new_obj "Lit" [("tra", trace_to_json tra); ("lit", lit_to_json lit)])
   /\
   (pres_to_json (ModCon tra optTup exps) =
     let exps' = ("exps", Array (MAP pres_to_json exps)) in
