@@ -426,8 +426,8 @@ val pres_to_json_def = tDefine"pres_to_json"`
       new_obj "Dlet" [("num", num_to_json num); ("exp", pres_to_json exp)])
   /\
   (pres_to_json (Dletrec lst) =
-    let fields = Array (MAP (\(v1,v2,exp) . Object [("var1",String v1); ("var2",String v2); ("exp", pres_to_json exp)]) lst) in
-      new_obj "Dletrec" [("exps",fields)])
+    let fields = Array (MAP (\(v1, v2, exp) . Object [("var1", String v1); ("var2", String v2); ("exp", pres_to_json exp)]) lst) in
+      new_obj "Dletrec" [("exps", fields)])
   /\
   (pres_to_json (Dtype modNs) =
     let modNs' = Array (MAP String modNs) in
@@ -439,7 +439,7 @@ val pres_to_json_def = tDefine"pres_to_json"`
       new_obj "Dexn" [("modNs", modNs'); ("con", String conN); ("ts", ts')])
   /\
   (pres_to_json (Pvar varN) =
-      new_obj "Pvar" [("pat", Object[("var",String varN)])])
+      new_obj "Pvar" [("varN", String varN)])
   /\
   (pres_to_json (Plit lit) =
       new_obj "Plit" [("lit", lit_to_json lit)])
@@ -449,43 +449,42 @@ val pres_to_json_def = tDefine"pres_to_json"`
     let ids' = case optTup of
                   | NONE => ("modscon", Null)
                   | SOME optUp' => ("modscon", (id_to_object optUp')) in
-      new_obj "Pcon-modlang" [ids';exps'])
+      new_obj "Pcon-modLang" [ids'; exps'])
   /\
   (pres_to_json (ConPcon optTup exps) =
-    let exps' = Array (MAP pres_to_json exps) in 
+    let exps' = Array (MAP pres_to_json exps) in
     let tup' = case optTup of
                   | NONE => Null
                   | SOME (num, te) => case te of
-                      | TypeId id => Array [num_to_json num; new_obj "TypeId"
-                      [("id", id_to_object id)]]
-                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn"
-                      [("id", id_to_object id)]] in
-      new_obj "Pcon-conlang" [("numtid",tup');("pats", exps')])
+                      | TypeId id => Array [num_to_json num; new_obj "TypeId" [("id", id_to_object id)]]
+                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn" [("id", id_to_object id)]]
+    in
+      new_obj "Pcon-conLang" [("numtid", tup'); ("pats", exps')])
   /\
   (pres_to_json (Pref exp) =
       new_obj "Pref" [("pat", pres_to_json exp)])
   /\
   (pres_to_json (Ptannot exp t) =
-      new_obj "Ptannot" [("pat", pres_to_json exp);("t", t_to_json t)])
+      new_obj "Ptannot" [("pat", pres_to_json exp); ("t", t_to_json t)])
   /\
   (pres_to_json (Raise tra exp) =
-      new_obj "Raise" [("tra", trace_to_json tra);("exp", pres_to_json exp)])
+      new_obj "Raise" [("tra", trace_to_json tra); ("exp", pres_to_json exp)])
   /\
   (pres_to_json (Handle tra exp expsTup) =
-    let expsTup' = Array (MAP(\(e1, e2) . Object[("pat", pres_to_json e1);("exp",
-    pres_to_json e2)])
-    expsTup) in
-      new_obj "Handle" [("tra", trace_to_json tra);("exp", pres_to_json exp);("exps", expsTup')])
+    let expsTup' = Array (MAP (\(e1, e2) . Object [
+      ("pat", pres_to_json e1);
+      ("exp", pres_to_json e2)
+    ]) expsTup) in
+      new_obj "Handle" [("tra", trace_to_json tra); ("exp", pres_to_json exp); ("exps", expsTup')])
   /\
   (pres_to_json (Var_local tra varN) =
-      new_obj "Var_local" [("tra", trace_to_json tra);("var", String varN)])
+      new_obj "Var_local" [("tra", trace_to_json tra); ("varN", String varN)])
   /\
   (pres_to_json (Var_global tra num) =
-      new_obj "Var_global" [("tra", trace_to_json tra);("num", num_to_json num)])
+      new_obj "Var_global" [("tra", trace_to_json tra); ("num", num_to_json num)])
   /\
   (pres_to_json (Extend_global tra num) =
-      new_obj "Extend_global" [("tra", trace_to_json tra);("num", num_to_json
-      num)])
+      new_obj "Extend_global" [("tra", trace_to_json tra); ("num", num_to_json num)])
   /\ 
   (pres_to_json (Lit tra lit) =
       new_obj "Lit" [("tra", trace_to_json tra); ("lit", lit_to_json lit)])
@@ -495,46 +494,45 @@ val pres_to_json_def = tDefine"pres_to_json"`
     let ids' = case optTup of
                   | NONE => ("modscon", Null)
                   | SOME optUp' => ("modscon", (id_to_object optUp')) in
-      new_obj "Con-modlang" [("tra", trace_to_json tra);ids';exps'])
+      new_obj "Con-modlang" [("tra", trace_to_json tra); ids'; exps'])
   /\
   (pres_to_json (ConCon tra optTup exps) =
     let exps' = Array (MAP pres_to_json exps) in
     let tup' = case optTup of
                   | NONE => Null
                   | SOME (num, te) => case te of
-                      | TypeId id => Array [num_to_json num; new_obj "TypeId"
-                      [("id", id_to_object id)]]
-                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn"
-                      [("id", id_to_object id)]] in
-      new_obj "Con-conlang" [("tra", trace_to_json tra);("numtid",tup');("pats", exps')])
+                      | TypeId id => Array [num_to_json num; new_obj "TypeId" [("id", id_to_object id)]]
+                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn" [("id", id_to_object id)]] in
+      new_obj "Con-conlang" [("tra", trace_to_json tra); ("numtid", tup'); ("pats", exps')])
   /\
   (pres_to_json (App tra op exps) =
     let exps' = ("exps", Array (MAP pres_to_json exps)) in
-      new_obj "App" [("tra", trace_to_json tra);("op", op_to_json op);exps'])
+      new_obj "App" [("tra", trace_to_json tra); ("op", op_to_json op); exps'])
   /\
   (pres_to_json (Fun tra varN exp) =
-      new_obj "Fun" [("tra", trace_to_json tra);("var", String varN);("exp", pres_to_json exp)])
+      new_obj "Fun" [("tra", trace_to_json tra); ("varN", String varN); ("exp", pres_to_json exp)])
   /\
   (pres_to_json (Log tra lop exp1 exp2) =
-      new_obj "Log" [("tra", trace_to_json tra);("lop", lop_to_json lop);("exp1", pres_to_json exp1);("exp2", pres_to_json exp2)])
+      new_obj "Log" [("tra", trace_to_json tra); ("lop", lop_to_json lop); ("exp1", pres_to_json exp1); ("exp2", pres_to_json exp2)])
   /\
   (pres_to_json (If tra exp1 exp2 exp3) =
-      new_obj "If" [("tra", trace_to_json tra);("exp1", pres_to_json exp1);("exp2", pres_to_json exp2);("exp3", pres_to_json exp3)])
+      new_obj "If" [("tra", trace_to_json tra); ("exp1", pres_to_json exp1); ("exp2", pres_to_json exp2); ("exp3", pres_to_json exp3)])
   /\
   (pres_to_json (Mat tra exp expsTup) =
-    let expsTup' = Array (MAP(\(e1, e2) . Object[("pat", pres_to_json e1);("exp", pres_to_json e2)]) expsTup) in
-      new_obj "Mat" [("tra", trace_to_json tra);("exp", pres_to_json exp);("exps",expsTup')])
+    let expsTup' = Array (MAP (\(e1, e2) . Object [("pat", pres_to_json e1); ("exp", pres_to_json e2)]) expsTup) in
+      new_obj "Mat" [("tra", trace_to_json tra); ("exp", pres_to_json exp); ("exps", expsTup')])
   /\
   (pres_to_json (Let tra varN exp1 exp2) =
     let varN' = option_to_json varN in
-      new_obj "Let" [("tra", trace_to_json tra);("var", varN');("exp1", pres_to_json
-      exp1);("exp2", pres_to_json exp2)])
+      new_obj "Let" [("tra", trace_to_json tra); ("varN", varN'); ("exp1", pres_to_json exp1); ("exp2", pres_to_json exp2)])
   /\
   (pres_to_json (Letrec tra varexpTup exp) =
-    let varexpTup' = Array (MAP (\(v1,v2,e) . Object [("var1", String
-    v1);("var2", String v2);("exp", pres_to_json e)]) varexpTup) in
-      new_obj "Letrec" [("tra", trace_to_json tra);("varsexp",
-      varexpTup');("exp", pres_to_json exp)])
+    let varexpTup' = Array (MAP (\(v1, v2, e) . Object [
+      ("var1", String v1);
+      ("var2", String v2);
+      ("exp", pres_to_json e)
+    ]) varexpTup) in
+      new_obj "Letrec" [("tra", trace_to_json tra); ("varsexp", varexpTup'); ("exp", pres_to_json exp)])
   /\
   (pres_to_json _ = Null)`
   cheat;
