@@ -19,6 +19,12 @@ val _ = Datatype`
     | Ast ast$op
     | Conlang conLang$op`;
 
+(* The format of a constructor, which differs by language. *)
+val _ = Datatype`
+  conF =
+    | Mod_con (((modN, conN) id) option)
+    | Con_con ((num # tid_or_exn) option)`;
+
 val _ = Datatype`
   exp =
     (* An entire program. Is divided into any number of top level prompts. *)
@@ -33,8 +39,7 @@ val _ = Datatype`
     | Plit lit
     (* TODO: Consider doing what we did with op above for the patterns below, in
      * order to avoid creating separate constructors for separate languages *)
-    | ModPcon (((modN, conN) id) option) (exp(*pat*) list)
-    | ConPcon ((num # tid_or_exn) option) (exp(*pat*) list)
+    | Pcon conF (exp(*pat*) list)
     | Pref exp(*pat*)
     | Ptannot exp(*pat*) t
     (* Expressions *)
@@ -46,8 +51,7 @@ val _ = Datatype`
     | Lit tra lit
       (* Constructor application.
        A Nothing constructor indicates a tuple pattern. *)
-    | ModCon tra (((modN, conN) id) option) (exp list)
-    | ConCon tra ((num # tid_or_exn) option) (exp list)
+    | Con tra conF (exp list)
       (* Application of a primitive operator to arguments.
        Includes function application. *)
     | App tra op (exp list)
@@ -76,7 +80,7 @@ val mod_to_pres_pat_def = tDefine "mod_to_pres_pat"`
     case p of
        | ast$Pvar varN => presLang$Pvar varN
        | Plit lit => Plit lit
-       | Pcon id pats => ModPcon id (MAP mod_to_pres_pat pats)
+       | Pcon id pats => Pcon (Mod_con id) (MAP mod_to_pres_pat pats)
        | Pref pat => Pref (mod_to_pres_pat pat)
        (* Won't happen, these are removed in compilation from source to mod. *)
        | Ptannot pat t => Ptannot (mod_to_pres_pat pat) t`
@@ -90,7 +94,7 @@ val mod_to_pres_exp_def = tDefine"mod_to_pres_exp"`
   /\
   (mod_to_pres_exp (Lit tra lit) = Lit tra lit)
   /\
-  (mod_to_pres_exp (Con tra id_opt exps) = ModCon tra id_opt (MAP mod_to_pres_exp exps))
+  (mod_to_pres_exp (Con tra id_opt exps) = Con tra (Mod_con id_opt) (MAP mod_to_pres_exp exps))
   /\
   (mod_to_pres_exp (Var_local tra varN) = Var_local tra varN)
   /\
@@ -142,19 +146,18 @@ val con_to_pres_pat_def = tDefine"con_to_pres_pat"`
     case p of
        | conLang$Pvar varN => presLang$Pvar varN
        | Plit lit => Plit lit
-       | Pcon opt ps => ConPcon opt (MAP con_to_pres_pat ps)
+       | Pcon opt ps => Pcon (Con_con opt) (MAP con_to_pres_pat ps)
        | Pref pat => Pref (con_to_pres_pat pat)`
     cheat;
 
 val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
-  (con_to_pres_exp (conLang$Raise t e) = Raise t (con_to_pres_exp e))
+  (con_to_pres_exp (conLang$Raise t e) = presLang$Raise t (con_to_pres_exp e))
   /\ 
   (con_to_pres_exp (Handle t e pes) = Handle t (con_to_pres_exp e) (con_to_pres_pes pes))
   /\
   (con_to_pres_exp (Lit t l) = Lit t l)
   /\
-  (con_to_pres_exp (Con t ntOpt exps) = ConCon t ntOpt (MAP con_to_pres_exp
-  exps))
+  (con_to_pres_exp (Con t ntOpt exps) = Con t (Con_con ntOpt) (MAP con_to_pres_exp exps))
   /\ 
   (con_to_pres_exp (Var_local t varN) = Var_local t varN)
   /\
@@ -444,16 +447,17 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json (Plit lit) =
       new_obj "Plit" [("lit", lit_to_json lit)])
   /\
-  (pres_to_json (ModPcon optTup exps) =
+  (* TODO: Unify the two conjunctions for Pcon. *)
+  (pres_to_json (Pcon (Mod_con con) exps) =
     let exps' = ("pats", Array (MAP pres_to_json exps)) in
-    let ids' = case optTup of
+    let ids' = case con of
                   | NONE => ("modscon", Null)
-                  | SOME optUp' => ("modscon", (id_to_object optUp')) in
+                  | SOME con' => ("modscon", (id_to_object con')) in
       new_obj "Pcon-modLang" [ids'; exps'])
   /\
-  (pres_to_json (ConPcon optTup exps) =
+  (pres_to_json (Pcon (Con_con con) exps) =
     let exps' = Array (MAP pres_to_json exps) in
-    let tup' = case optTup of
+    let tup' = case con of
                   | NONE => Null
                   | SOME (num, te) => case te of
                       | TypeId id => Array [num_to_json num; new_obj "TypeId" [("id", id_to_object id)]]
@@ -489,16 +493,17 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json (Lit tra lit) =
       new_obj "Lit" [("tra", trace_to_json tra); ("lit", lit_to_json lit)])
   /\
-  (pres_to_json (ModCon tra optTup exps) =
+  (* TODO: Unify the two conjunctions for Con. *)
+  (pres_to_json (Con tra (Mod_con con) exps) =
     let exps' = ("exps", Array (MAP pres_to_json exps)) in
-    let ids' = case optTup of
+    let ids' = case con of
                   | NONE => ("modscon", Null)
-                  | SOME optUp' => ("modscon", (id_to_object optUp')) in
+                  | SOME con' => ("modscon", (id_to_object con')) in
       new_obj "Con-modLang" [("tra", trace_to_json tra); ids'; exps'])
   /\
-  (pres_to_json (ConCon tra optTup exps) =
+  (pres_to_json (Con tra (Con_con con) exps) =
     let exps' = Array (MAP pres_to_json exps) in
-    let tup' = case optTup of
+    let tup' = case con of
                   | NONE => Null
                   | SOME (num, te) => case te of
                       | TypeId id => Array [num_to_json num; new_obj "TypeId" [("id", id_to_object id)]]
