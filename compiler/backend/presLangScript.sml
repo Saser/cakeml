@@ -151,8 +151,8 @@ val con_to_pres_pat_def = tDefine"con_to_pres_pat"`
     cheat;
 
 val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
-  (con_to_pres_exp (conLang$Raise t e) = presLang$Raise t (con_to_pres_exp e))
-  /\ 
+  (con_to_pres_exp (conLang$Raise t e) = Raise t (con_to_pres_exp e))
+  /\
   (con_to_pres_exp (Handle t e pes) = Handle t (con_to_pres_exp e) (con_to_pres_pes pes))
   /\
   (con_to_pres_exp (Lit t l) = Lit t l)
@@ -171,22 +171,22 @@ val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   /\
   (con_to_pres_exp (Let t varN e1 e2) = Let t varN (con_to_pres_exp e1)
   (con_to_pres_exp e2))
-  /\ 
+  /\
   (con_to_pres_exp (Letrec t funs e) = Letrec t (MAP (\(v1,v2,e).(v1,v2,con_to_pres_exp e)) funs) (con_to_pres_exp e))
   /\
   (con_to_pres_exp (Extend_global t num) = Extend_global t num)
-  /\ 
+  /\
   (con_to_pres_pes [] = [])
   /\
   (con_to_pres_pes ((p,e)::pes) =
     (con_to_pres_pat p, con_to_pres_exp e)::con_to_pres_pes pes)`
-  cheat; 
+  cheat;
 
 val con_to_pres_dec_def = Define`
   con_to_pres_dec d =
     case d of
        | conLang$Dlet num exp => presLang$Dlet num (con_to_pres_exp exp)
-       | Dletrec funs => Dletrec (MAP (\(v1,v2,e). (v1,v2,con_to_pres_exp e)) funs)`; 
+       | Dletrec funs => Dletrec (MAP (\(v1,v2,e). (v1,v2,con_to_pres_exp e)) funs)`;
 
 val con_to_pres_prompt_def = Define`
   con_to_pres_prompt (Prompt decs) = Prompt NONE (MAP con_to_pres_dec decs)`;
@@ -217,9 +217,9 @@ val trace_to_json_def = Define`
   (trace_to_json None = Null)`;
 
 val word_size_to_json_def = Define`
-  (word_size_to_json W8 = String "W8")
+  (word_size_to_json W8 = new_obj "W8" [])
   /\
-  (word_size_to_json W64 = String "W64")`;
+  (word_size_to_json W64 = new_obj "W64" [])`;
 
 val opn_to_json_def = Define`
   (opn_to_json Plus = new_obj "Plus" [])
@@ -253,11 +253,13 @@ val opw_to_json_def = Define`
   (opw_to_json Sub = new_obj "Sub" [])`;
 
 val shift_to_json_def = Define`
-  (shift_to_json Lsl = new_obj "Andw" [])
+  (shift_to_json Lsl = new_obj "Lsl" [])
   /\
-  (shift_to_json Lsr = new_obj "Orw" [])
+  (shift_to_json Lsr = new_obj "Lsr" [])
   /\
-  (shift_to_json Asr = new_obj "Xor" [])`;
+  (shift_to_json Asr = new_obj "Asr" [])
+  /\
+  (shift_to_json Ror = new_obj "Ror" [])`;
 
 val op_to_json_def = Define`
   (op_to_json (Con_op (Init_global_var num)) = new_obj "Init_global_var" [("num", num_to_json num)])
@@ -309,7 +311,7 @@ val op_to_json_def = Define`
   /\
   (op_to_json (Ast_op Chr) = new_obj "Chr" [])
   /\
-  (op_to_json (Ast_op (Chopb opb)) = new_obj "Chopb" [("op", opb_to_json opb)])
+  (op_to_json (Ast_op (Chopb opb)) = new_obj "Chopb" [("opb", opb_to_json opb)])
   /\
   (op_to_json (Ast_op Implode) = new_obj "Implode" [])
   /\
@@ -331,12 +333,16 @@ val op_to_json_def = Define`
   /\
   (op_to_json (Ast_op Aupdate) = new_obj "Aupdate" [])
   /\
-  (op_to_json (Ast_op (FFI str)) = new_obj "FFI" [("str", String str)])`;
+  (op_to_json (Ast_op (FFI str)) = new_obj "FFI" [("str", String str)])
+  /\
+  (op_to_json _ = new_obj "Unknown" [])`;
 
 val lop_to_json_def = Define`
   (lop_to_json ast$And = String "And")
   /\
-  (lop_to_json Or = String "Or")`
+  (lop_to_json Or = String "Or")
+  /\
+  (lop_to_json _ = String "Unknown")`
 
 val id_to_list_def = Define`
   id_to_list i = case i of
@@ -489,7 +495,7 @@ val pres_to_json_def = tDefine"pres_to_json"`
   /\
   (pres_to_json (Extend_global tra num) =
       new_obj "Extend_global" [("tra", trace_to_json tra); ("num", num_to_json num)])
-  /\ 
+  /\
   (pres_to_json (Lit tra lit) =
       new_obj "Lit" [("tra", trace_to_json tra); ("lit", lit_to_json lit)])
   /\
