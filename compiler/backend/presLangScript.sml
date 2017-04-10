@@ -1,5 +1,5 @@
 open preamble astTheory jsonTheory backend_commonTheory;
-open conLangTheory modLangTheory;
+open conLangTheory modLangTheory exhLangTheory;
 
 val _ = new_theory"presLang";
 
@@ -35,6 +35,7 @@ val _ = Datatype`
      * order to avoid creating separate constructors for separate languages *)
     | ModPcon (((modN, conN) id) option) (exp(*pat*) list)
     | ConPcon ((num # tid_or_exn) option) (exp(*pat*) list)
+    | ExhPcon num (exp list)
     | Pref exp(*pat*)
     | Ptannot exp(*pat*) t
     (* Expressions *)
@@ -48,6 +49,7 @@ val _ = Datatype`
        A Nothing constructor indicates a tuple pattern. *)
     | ModCon tra (((modN, conN) id) option) (exp list)
     | ConCon tra ((num # tid_or_exn) option) (exp list)
+    | ExhCon tra num (exp list)
       (* Application of a primitive operator to arguments.
        Includes function application. *)
     | App tra op (exp list)
@@ -190,6 +192,47 @@ val con_to_pres_prompt_def = Define`
 
 val con_to_pres_def = Define`
   con_to_pres prompts = Prog (MAP con_to_pres_prompt prompts)`;
+
+(* exh_to_pres *)
+val exh_to_pres_pat_def = tDefine"exh_to_pres_pat"`
+  exh_to_pres_pat p =
+    case p of
+       | exhLang$Pvar varN => presLang$Pvar varN
+       | Plit lit => Plit lit
+       | Pcon num ps => ExhPcon num (MAP exh_to_pres_pat ps)
+       | Pref pat => Pref (exh_to_pres_pat pat)`
+    cheat;
+
+val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"` 
+  (exh_to_pres_exp (exhLang$Raise t e) = Raise t (exh_to_pres_exp e)) 
+  /\
+  (exh_to_pres_exp (Handle t e pes) = Handle t (exh_to_pres_exp e) (exh_to_pres_pes pes))
+  /\
+  (exh_to_pres_exp (Lit t l) = Lit t l)
+  /\
+  (exh_to_pres_exp (Con t n es) = ExhCon t n (MAP exh_to_pres_exp es))
+  /\
+  (exh_to_pres_exp (Var_local t varN) = Var_local t varN)
+  /\
+  (exh_to_pres_exp (Var_global t n) = Var_global t n)
+  /\
+  (exh_to_pres_exp (Fun t varN e) = Fun t varN (exh_to_pres_exp e))
+  /\
+  (exh_to_pres_exp (App t op es) = App t (Conlang op) (MAP exh_to_pres_exp es))
+  /\ 
+  (exh_to_pres_exp (Mat t e pes) = Mat t (exh_to_pres_exp e) (exh_to_pres_pes pes)) 
+  /\
+  (exh_to_pres_exp (Let t varN e1 e2) = Let t varN (exh_to_pres_exp e1) (exh_to_pres_exp e2)) 
+  /\
+  (exh_to_pres_exp (Letrec t funs e1) = Letrec t (MAP (\(v1,v2,e).(v1,v2,exh_to_pres_exp e)) funs) (exh_to_pres_exp e1))
+  /\
+  (exh_to_pres_exp (Extend_global t n) = Extend_global t n)
+  /\
+  (exh_to_pres_pes [] = [])
+  /\
+  (exh_to_pres_pes ((p,e)::pes) =
+    (exh_to_pres_pat p, exh_to_pres_exp e)::exh_to_pres_pes pes)`
+  cheat; 
 
 (* pres_to_json *)
 (* TODO: Add words *)
@@ -454,6 +497,10 @@ val pres_to_json_def = tDefine"pres_to_json"`
                       | TypeExn id => Array [num_to_json num; new_obj "TypeExn"
                       [("id", id_to_object id)]] in
       new_obj "Pcon-conlang" [("numtid",tup');("pats", exps')])
+  /\
+  (pres_to_json (ExhPcon num exps) =
+    let exps' = Array (MAP pres_to_json exps) in
+      new_obj "Pcon-exhlang" [("num", num_to_json num);("pats", exps')])
   /\
   (pres_to_json (Pref exp) =
       new_obj "Pref" [("pat", pres_to_json exp)])
