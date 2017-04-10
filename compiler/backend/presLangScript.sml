@@ -19,7 +19,8 @@ val _ = Datatype`
     | Ast_op ast$op
     | Conlang_op conLang$op`;
 
-(* The format of a constructor, which differs by language. *)
+(* The format of a constructor, which differs by language. A Nothing constructor
+* indicates a tuple pattern. *)
 val _ = Datatype`
   conF =
     | Modlang_con (((modN, conN) id) option)
@@ -35,10 +36,9 @@ val _ = Datatype`
     | Dletrec ((varN # varN # exp(*exp*)) list)
     | Dtype (modN list)
     | Dexn (modN list) conN (t list)
+    (* Patterns *)
     | Pvar varN
     | Plit lit
-    (* TODO: Consider doing what we did with op above for the patterns below, in
-     * order to avoid creating separate constructors for separate languages *)
     | Pcon conF (exp(*pat*) list)
     | Pref exp(*pat*)
     | Ptannot exp(*pat*) t
@@ -49,8 +49,6 @@ val _ = Datatype`
     | Var_global tra num
     | Extend_global tra num (* Introduced in conLang *)
     | Lit tra lit
-      (* Constructor application.
-       A Nothing constructor indicates a tuple pattern. *)
     | Con tra conF (exp list)
       (* Application of a primitive operator to arguments.
        Includes function application. *)
