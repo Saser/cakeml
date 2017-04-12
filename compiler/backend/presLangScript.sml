@@ -621,4 +621,7 @@ val con_to_json_def = Define`
 val dec_to_json_def = Define`
   dec_to_json = lang_to_json "decLang" con_to_pres_exp`;
 
+val exh_to_json_def = Define`
+  exh_to_json = lang_to_json "exhLang" exh_to_pres_exp`;
+
 val _ = export_theory();
