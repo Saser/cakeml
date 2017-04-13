@@ -73,6 +73,10 @@ val _ = Datatype`
 
 (* Functions for converting intermediate languages to presLang. *)
 
+val num_to_str_def = tDefine "num_to_str"`
+  num_to_str n = if n < 26 then [CHR (97 + n)]
+                 else (num_to_str ((n DIV 26)-1)) ++ ([CHR (97 + (n MOD 26))])`
+cheat;
 (* modLang *)
 
 val mod_to_pres_pat_def = tDefine "mod_to_pres_pat"`
