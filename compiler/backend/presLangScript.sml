@@ -627,7 +627,10 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
 * returns a JSON representation of that program. *)
 (* TODO: Make these use the pres_to_structured step. *)
 val lang_to_json_def = Define`
-  lang_to_json langN func = \ p . Object [("lang", String langN); ("prog", pres_to_json (func p))]`;
+  lang_to_json langN func = 
+    \ p . Object [
+      ("lang", String langN);
+      ("prog", structured_to_json (pres_to_structured (func p)))]`;
 
 val mod_to_json_def = Define`
   mod_to_json = lang_to_json "modLang" mod_to_pres`;
