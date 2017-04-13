@@ -622,7 +622,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       Item (SOME tra) "Letrec" [varexpTup'; pres_to_structured exp])
   /\
   (pres_to_structured _ = Item NONE "\"Unknown constructor\"" [])
-`cheat;
+  `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
 * the name of the language and what fucntion to use to convert it to preslang to
