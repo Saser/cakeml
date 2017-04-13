@@ -318,6 +318,7 @@ val shift_to_json_def = Define`
   /\
   (shift_to_json Ror = new_obj "Ror" [])`;
 
+(* TODO: pres_to_structured uses `op_to_structured`. Implement that. *)
 val op_to_json_def = Define`
   (op_to_json (Conlang_op (Init_global_var num)) = new_obj "Init_global_var" [("num", num_to_json num)])
   /\
@@ -394,6 +395,7 @@ val op_to_json_def = Define`
   /\
   (op_to_json _ = new_obj "Unknown" [])`;
 
+(* TODO: Change to lop_to_structured. *)
 val lop_to_json_def = Define`
   (lop_to_json ast$And = String "And")
   /\
@@ -419,6 +421,7 @@ val num_to_hex_def = Define `
 val word_to_hex_string_def = Define `
   word_to_hex_string w = "0x" ++ num_to_hex (w2n (w:'a word))`;
 
+(* TODO: Change to lit_to_structured *)
 val lit_to_json_def = Define`
   (lit_to_json (IntLit i) = new_obj "IntLit" [("value", Int i)])
   /\
