@@ -749,6 +749,13 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   /\
   (pres_to_structured (Ptannot exp t) =
       Item NONE "Ptannot" [pres_to_structured exp; t_to_structured t])
+  /\
+  (pres_to_structured (Raise tra exp) =
+      Item (SOME tra) "Raise" [pres_to_structured exp])
+  /\
+  (pres_to_structured (Handle tra exp expsTup) =
+    let expsTup' = List (MAP (\(e1, e2) . Tuple [ pres_to_structured e1; pres_to_structured e2 ]) expsTup) in
+      Item (SOME tra) "Handle" [trace_to_structured tra; pres_to_structured exp; expsTup'])
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
