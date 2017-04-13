@@ -743,6 +743,12 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
          n; tid_or_exn_to_structured t]]
          | Exhlang_con c => Item NONE "SOME" [num_to_structured c] in
       Item NONE "Pcon" [conF'; exps'])
+  /\
+  (pres_to_structured (Pref exp) =
+      Item NONE "Pref" [pres_to_structured exp])
+  /\
+  (pres_to_structured (Ptannot exp t) =
+      Item NONE "Ptannot" [pres_to_structured exp; t_to_structured t])
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
