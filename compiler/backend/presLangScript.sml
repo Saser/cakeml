@@ -787,6 +787,24 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   /\
   (pres_to_structured (If tra exp1 exp2 exp3) =
       Item (SOME tra) "If" [pres_to_structured exp1; pres_to_structured exp2; pres_to_structured exp3])
+  /\
+  (pres_to_structured (Mat tra exp expsTup) =
+    let expsTup' = List (MAP (\(e1, e2) . Tuple [ pres_to_structured e1; pres_to_structured e2 ]) expsTup) in
+      Item (SOME tra) "Mat" [pres_to_structured exp; expsTup'])
+  /\
+  (pres_to_structured (Let tra varN exp1 exp2) =
+    let varN' = option_to_structured varN in
+      Item (SOME tra) "Let" [varN'; pres_to_structured exp1; pres_to_structured exp2])
+  /\
+  (pres_to_structured (Letrec tra varexpTup exp) =
+    let varexpTup' = List (MAP (\ (v1, v2, e) . Tuple [
+      string_to_structured v1;
+      string_to_structured v2;
+      pres_to_structured e
+    ]) varexpTup) in
+      Item (SOME tra) "Letrec" [varexpTup'; pres_to_structured exp])
+  /\
+  (pres_to_structured _ = Item NONE "\"Unknown constructor\"")
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
