@@ -28,7 +28,7 @@ val sIf_def = Define `
   else
     (case e1 of
      | Con t [] => if t = true_tag then e2 else e3
-     | _ => If e1 e2 e3)`, 
+     | _ => If e1 e2 e3)`,
   rpt strip_tac
   >> every_case_tac
   >- fs[sIf_def]
@@ -185,7 +185,7 @@ val _ = Define `
   sLet t e1 e2 =
   dtcase e2 of
      | Var_local _ 0 => e1
-     | _ => 
+     | _ =>
          if ground 0 e2 then
            if pure e1 then e2
            else Seq t e1 e2
@@ -213,12 +213,10 @@ val _ = tDefine"compile_pat"`
   ∧
   (compile_pat t (Pcon tag ps) =
    sIf (mk_cons t 1) (App (mk_cons t 2) (Tag_eq tag (LENGTH ps)) [Var_local (mk_cons t 3) 0])
-     (Let_Els (mk_cons t 4) 0 (LENGTH ps) (compile_pats (mk_cons t 5) 0 ps))
-     (Bool F))
+     (Let_Els (mk_cons t 4) 0 (LENGTH ps) (compile_pats (mk_cons t 5) 0 ps)) (Bool F))
   ∧
   (compile_pat t (Pref p) =
-   sLet (mk_cons t 1) (App (mk_cons t 2) (Op (Op Opderef)) [Var_local (mk_cons t
-   3) 0])
+   sLet (mk_cons t 1) (App (mk_cons t 2) (Op (Op Opderef)) [Var_local (mk_cons t 3) 0])
      (compile_pat (mk_cons t 4) p))
   ∧
 (* return an expression that evaluates to whether all the m patterns match the
@@ -227,9 +225,7 @@ val _ = tDefine"compile_pat"`
   ∧
   (compile_pats t n (p::ps) =
    sIf (mk_cons t 1) (sLet (mk_cons t 2) (Var_local (mk_cons t 3) n)
-   (compile_pat (mk_cons t 4) p))
-     (compile_pats (mk_cons t 5) (n+1) ps)
-     (Bool F))`
+   (compile_pat (mk_cons t 4) p)) (compile_pats (mk_cons t 5) (n+1) ps) (Bool F))`
   cheat;
   (*(WF_REL_TAC `inv_image $< (\x. dtcase x of INL p => pat_size p
                                          | INR (n,ps) => pat1_size ps)`);*)
@@ -250,8 +246,7 @@ val _ = tDefine"compile_row"`
   ∧
   (compile_row t bvs (Pref p) =
    let (bvs,m,f) = (compile_row (mk_cons t 1) (NONE::bvs) p) in
-   (bvs,(1+m), (λe. sLet (mk_cons t 2) (App (mk_cons t 3) (Op (Op Opderef)) [Var_local (mk_cons t 4) 0]) (f e))))
-  ∧
+   (bvs,(1+m), (λe. sLet (mk_cons t 2) (App (mk_cons t 3) (Op (Op Opderef)) [Var_local (mk_cons t 4) 0]) (f e)))) ∧
   (compile_row _ bvs _ = (bvs, 0, I)) (* should not happen *)
   ∧
   (compile_cols _ bvs _ _ [] = (bvs, 0, I))
@@ -260,8 +255,7 @@ val _ = tDefine"compile_row"`
    let (bvs,m,f) = compile_row (mk_cons t 1) (NONE::bvs) p in
    let (bvs,ms,fs) = compile_cols (mk_cons t 2) bvs ((n+1)+m) (k+1) ps in
    (bvs,(1+m)+ms,
-    (λe. sLet (mk_cons t 3) (App (mk_cons t 4) (El k) [Var_local (mk_cons t 5) n])
-           (f (fs e)))))`
+    (λe. sLet (mk_cons t 3) (App (mk_cons t 4) (El k) [Var_local (mk_cons t 5) n]) (f (fs e)))))`
   cheat;
   (* (WF_REL_TAC `inv_image $< (\x. dtcase x of INL (bvs,p) => pat_size p
                                          | INR (bvs,n,k,ps) => pat1_size ps)`); *)
