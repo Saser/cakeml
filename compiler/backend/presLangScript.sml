@@ -474,11 +474,6 @@ val lit_to_json_def = Define`
   /\
   (lit_to_json (Word64 w) = new_obj "Word64" [("value",  String (word_to_hex_string w))])`
 
-val option_to_json_def = Define`
-  (option_to_json opt = case opt of
-                      | NONE => Null
-                      | SOME opt' => String opt')`
-
 (* Converts a structured expression to JSON *)
 val structured_to_json_def = tDefine"structured_to_json"`
   (structured_to_json (Tuple es) =
@@ -495,6 +490,17 @@ val structured_to_json_def = tDefine"structured_to_json"`
    /\
    (structured_to_json (List es) = Array (MAP structured_to_json es))`
       cheat;
+
+val string_to_structured_def = Define`
+  string_to_structured s = Item NONE s []`;
+
+val option_string_to_structured_def = Define`
+  (option_string_to_structured opt = case opt of
+                      | NONE => Item NONE "NONE" []
+                      | SOME opt' => string_to_structured opt')`
+
+val num_to_structured_def = Define`
+  num_to_structured n = Item NONE (num_to_str n) []`;
 
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
 val pres_to_json_def = tDefine"pres_to_json"`
