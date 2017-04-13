@@ -610,7 +610,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       Item (SOME tra) "Mat" [pres_to_structured exp; expsTup'])
   /\
   (pres_to_structured (Let tra varN exp1 exp2) =
-    let varN' = option_to_structured varN in
+    let varN' = option_string_to_structured varN in
       Item (SOME tra) "Let" [varN'; pres_to_structured exp1; pres_to_structured exp2])
   /\
   (pres_to_structured (Letrec tra varexpTup exp) =
