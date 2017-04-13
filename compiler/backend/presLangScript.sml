@@ -474,6 +474,11 @@ val lit_to_json_def = Define`
   /\
   (lit_to_json (Word64 w) = new_obj "Word64" [("value",  String (word_to_hex_string w))])`
 
+val option_to_json_def = Define`
+  option_to_json opt = case opt of
+                          | NONE => Null
+                          | SOME opt' => String opt'`;
+
 (* Converts a structured expression to JSON *)
 val structured_to_json_def = tDefine"structured_to_json"`
   (structured_to_json (Tuple es) =
