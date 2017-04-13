@@ -571,7 +571,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   /\
   (pres_to_structured (Handle tra exp expsTup) =
     let expsTup' = List (MAP (\(e1, e2) . Tuple [ pres_to_structured e1; pres_to_structured e2 ]) expsTup) in
-      Item (SOME tra) "Handle" [trace_to_structured tra; pres_to_structured exp; expsTup'])
+      Item (SOME tra) "Handle" [pres_to_structured exp; expsTup'])
   /\
   (pres_to_structured (Var_local tra varN) =
       Item (SOME tra) "Var_local" [string_to_structured varN])
