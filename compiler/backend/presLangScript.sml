@@ -409,9 +409,11 @@ val id_to_list_def = Define`
                       | Long modN i' => modN::id_to_list i'
                       | Short conN => [conN]`;
 
+(* TODO: Delete *)
 val id_to_object_def = Define`
     id_to_object ids = Array (MAP String (id_to_list ids))`
 
+(* TODO: Delete *)
 val tctor_to_json_def = Define`
   (tctor_to_json (ast$TC_name tuple) =
     let tuple' = id_to_object tuple in
@@ -441,6 +443,7 @@ val tctor_to_json_def = Define`
   /\
   (tctor_to_json TC_array = String "TC_array")`
 
+(* TODO: Delete *)
 val t_to_json_def = tDefine"t_to_json"`
   (t_to_json (Tvar tvarN) = String tvarN)
   /\
@@ -474,6 +477,7 @@ val lit_to_json_def = Define`
   /\
   (lit_to_json (Word64 w) = new_obj "Word64" [("value",  String (word_to_hex_string w))])`
 
+(* TODO: Delete *)
 val option_to_json_def = Define`
   option_to_json opt = case opt of
                           | NONE => Null
@@ -508,6 +512,7 @@ val num_to_structured_def = Define`
   num_to_structured n = Item NONE (num_to_str n) []`;
 
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
+(* TODO: Delete *)
 val pres_to_json_def = tDefine"pres_to_json"`
   (* Top level *)
   (pres_to_json (presLang$Prog tops) =
@@ -663,6 +668,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
 * the name of the language and what fucntion to use to convert it to preslang to
 * obtain a function which takes a program in an intermediate language and
 * returns a JSON representation of that program. *)
+(* TODO: Make these use the pres_to_structured step. *)
 val lang_to_json_def = Define`
   lang_to_json langN func = \ p . Object [("lang", String langN); ("prog", pres_to_json (func p))]`;
 
