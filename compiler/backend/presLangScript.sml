@@ -689,6 +689,14 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json _ = Null)`
   cheat;
 
+val tid_or_exn_to_structured_def = Define`
+  tid_or_exn_to_structured te =
+   let (name, id) =
+     case te of
+       | TypeId id =>  ("TypeId", id)
+       | TypeExn id => ("TypeExn", id) in
+     Item NONE name [id_to_structured id]`;
+
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
 val pres_to_structured_def = tDefine"pres_to_structured"`
   (* Top level *)
@@ -722,6 +730,19 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   /\
   (pres_to_structured (Plit lit) =
       Item NONE "Plit" [lit_to_structured lit])
+  /\
+  (pres_to_structured (Pcon conF exps) =
+    let exps' = List (MAP pres_to_structured exps) in
+    let none = Item NONE "NONE" [] in
+    let  conF' =
+      case con of
+         | Modlang_con NONE => none
+         | Conlang_con NONE => none
+         | Modlang_con (SOME id) => Item NONE "SOME" [id_to_structured id]
+         | Conlang_con (SOME (n,t)) => Item NONE "SOME" [Tuple [num_to_structured
+         n; tid_or_exn_to_structured t]]
+         | Exhlang_con c => Item NONE "SOME" [num_to_structured c] in
+      Item NONE "Pcon" [conF'; exps'])
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
