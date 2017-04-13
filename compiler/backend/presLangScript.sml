@@ -258,6 +258,7 @@ val lit_to_value_def = Define`
 val new_obj_def = Define`
   new_obj cons fields = json$Object (("cons", String cons)::fields)`;
 
+(* TODO: Can likely be removed after introduction of structured expressions. *)
 val num_to_json_def = Define`
   num_to_json n = Int (int_of_num n)`;
 
