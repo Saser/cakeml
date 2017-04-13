@@ -500,6 +500,9 @@ val structured_to_json_def = tDefine"structured_to_json"`
    (structured_to_json (List es) = Array (MAP structured_to_json es))`
       cheat;
 
+val num_to_structured_def = Define`
+  num_to_structured n = string_to_structured (num_to_str n)`;
+
 val string_to_structured_def = Define`
   string_to_structured s = Item NONE s []`;
 
@@ -508,8 +511,49 @@ val option_string_to_structured_def = Define`
                       | NONE => Item NONE "NONE" []
                       | SOME opt' => string_to_structured opt')`
 
+val id_to_structured_def = Define`
+    id_to_structured ids = List (MAP string_to_structured (id_to_list ids))`
+
+val tctor_to_structured_def = Define`
+  (tctor_to_structured (ast$TC_name ids) =
+    let ids' = id_to_structured ids in
+      Item NONE "TC_name" [ids'])
+  /\
+  (tctor_to_structured TC_int = string_to_structured "TC_int")
+  /\
+  (tctor_to_structured TC_char = string_to_structured "TC_char")
+  /\
+  (tctor_to_structured TC_string = string_to_structured "TC_string")
+  /\
+  (tctor_to_structured TC_ref = string_to_structured "TC_ref")
+  /\
+  (tctor_to_structured TC_word8 = string_to_structured "TC_word8")
+  /\
+  (tctor_to_structured TC_word64 = string_to_structured "TC_word64")
+  /\
+  (tctor_to_structured TC_word8array = string_to_structured "TC_word8array")
+  /\
+  (tctor_to_structured TC_fn = string_to_structured "TC_fn")
+  /\
+  (tctor_to_structured TC_tup = string_to_structured "TC_tup")
+  /\
+  (tctor_to_structured TC_exn = string_to_structured "TC_exp")
+  /\
+  (tctor_to_structured TC_vector = string_to_structured "TC_vector")
+  /\
+  (tctor_to_structured TC_array = string_to_structured "TC_array")`
+
 val num_to_structured_def = Define`
   num_to_structured n = Item NONE (num_to_str n) []`;
+
+val t_to_structured_def = tDefine"t_to_json"`
+  (t_to_structured (Tvar tvarN) = Item NONE "Tvar" [string_to_structured tvarN])
+  /\
+  (t_to_structured (Tvar_db n) = Item NONE "Tvar_db" [num_to_structured n])
+  /\
+  (t_to_structured (Tapp ts tctor) = Item NONE "Tapp" [ List (MAP t_to_structured ts);
+    tctor_to_structured tctor])`
+  cheat;
 
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
 (* TODO: Delete *)
