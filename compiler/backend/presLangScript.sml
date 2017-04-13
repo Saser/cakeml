@@ -706,7 +706,17 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   /\
   (pres_to_structured (Dletrec lst) =
     let fields = List (MAP (\ (v1, v2, exp) . Tuple [string_to_structured v1; string_to_structured v2; pres_to_structured exp]) lst) in
-      Item NONE "Dletrec" [fields] )`cheat;
+      Item NONE "Dletrec" [fields] )
+  /\
+  (pres_to_structured (Dtype modNs) =
+    let modNs' = List (MAP string_to_structured modNs) in
+      Item NONE "Dtype" [modNs'])
+  /\
+  (pres_to_structured (Dexn modNs conN ts) =
+    let modNs' = List (MAP string_to_structured modNs) in
+    let ts' = List (MAP t_to_structured ts) in
+      Item NONE "Dexn" [modNs'; string_to_structured conN;  ts'])
+`cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
 * the name of the language and what fucntion to use to convert it to preslang to
