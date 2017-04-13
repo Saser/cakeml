@@ -635,6 +635,25 @@ val pres_to_json_def = tDefine"pres_to_json"`
   (pres_to_json _ = Null)`
   cheat;
 
+(* Takes a presLang$exp and produces json$obj that mimics its structure. *)
+val pres_to_structured_def = tDefine"pres_to_structured"`
+  (* Top level *)
+  (pres_to_structured (presLang$Prog tops) =
+    let tops' = List (MAP pres_to_structured tops) in
+      Item NONE "Prog" [tops'])
+  /\
+  (pres_to_structured (Prompt modN decs) =
+    let decs' = List (MAP pres_to_structured decs) in
+    let modN' = option_string_to_structured modN in
+      Item NONE "Prompt" [modN'; decs'])
+  /\
+  (pres_to_structured (Dlet num exp) =
+      Item NONE "Dlet" [num_to_structured num; pres_to_structured exp])
+  /\
+  (pres_to_structured (Dletrec lst) =
+    let fields = List (MAP (\ (v1, v2, exp) . Tuple [string_to_structured v1; string_to_structured v2; pres_to_structured exp]) lst) in
+      Item NONE "Dletrec" [fields] )`cheat;
+
 (* Function to construct general functions from a language to JSON. Call with
 * the name of the language and what fucntion to use to convert it to preslang to
 * obtain a function which takes a program in an intermediate language and
