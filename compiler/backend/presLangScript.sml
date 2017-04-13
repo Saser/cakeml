@@ -770,6 +770,10 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   /\
   (pres_to_structured (Lit tra lit) =
       Item (SOME tra) "Lit" [lit_to_structured lit])
+  /\
+  (pres_to_structured (Con tra conF exps) =
+    let exps' = List (MAP pres_to_structured exps) in
+      Item (SOME tra) "Pcon" [conf_to_structured conF; exps'])
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
