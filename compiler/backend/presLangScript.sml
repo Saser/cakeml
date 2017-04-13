@@ -75,7 +75,7 @@ val _ = Datatype`
 val _ = Datatype`
   sExp =
     | Tuple (sExp list)
-    | Item tra string (sExp list)`;
+    | Item (tra option) string (sExp list)`;
 
 (* Functions for converting intermediate languages to presLang. *)
 
@@ -268,7 +268,7 @@ val trace_to_json_def = Define`
     new_obj "Union"
       [("trace1", trace_to_json tra1); ("trace2", trace_to_json tra2)])
   /\
-  (trace_to_json Empty = Null)
+  (trace_to_json Empty = new_obj "Empty" [])
   /\
   (* TODO: cancel entire trace when None, or verify that None will always be at
   * the top level of a trace. *)
@@ -485,7 +485,11 @@ val structured_to_json_def = tDefine"structured_to_json"`
   /\
   (structured_to_json (Item tra name es) =
     let es' = MAP structured_to_json es in
-      Object [("trace", (trace_to_json tra)); ("name", String name); ("args", Array es')])`
+    let props = [("name", String name); ("args", Array es')] in
+    let props' = case tra of
+                   | NONE => props
+                   | SOME t => ("trace", trace_to_json t)::props in
+      Object props')`
       cheat;
 
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
