@@ -242,8 +242,12 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
     (exh_to_pres_pat p, exh_to_pres_exp e)::exh_to_pres_pes pes)`
   cheat; 
 
-(* pres_to_json *)
+(* structured_to_json *)
 (* TODO: Add words *)
+
+val new_obj_def = Define`
+  new_obj cons fields = Object (("name", String cons)::fields)`;
+
 val lit_to_value_def = Define`
   (lit_to_value (IntLit i) = Int i)
   /\
@@ -253,24 +257,17 @@ val lit_to_value_def = Define`
   /\
   (lit_to_value _ = String "word8/64")`;
 
-(* Create a new json$Object with keys and values as in the tuples. Every object
-* has constructor name field, cons *)
-val new_obj_def = Define`
-  new_obj cons fields = json$Object (("cons", String cons)::fields)`;
-
-(* TODO: Can likely be removed after introduction of structured expressions. *)
 val num_to_json_def = Define`
-  num_to_json n = Int (int_of_num n)`;
+  num_to_json n = String (num_to_str n)`;
 
 val trace_to_json_def = Define`
   (trace_to_json (backend_common$Cons tra num) =
-    new_obj "Cons" [("num", num_to_json num); ("trace", trace_to_json tra)])
+    Object [("name", String "Cons"); ("num", num_to_json num); ("trace", trace_to_json tra)])
   /\
   (trace_to_json (Union tra1 tra2) =
-    new_obj "Union"
-      [("trace1", trace_to_json tra1); ("trace2", trace_to_json tra2)])
+      Object [("name", String "Union"); ("trace1", trace_to_json tra1); ("trace2", trace_to_json tra2)])
   /\
-  (trace_to_json Empty = new_obj "Empty" [])
+  (trace_to_json Empty = Object [("name", String "Empty")])
   /\
   (* TODO: cancel entire trace when None, or verify that None will always be at
   * the top level of a trace. *)
@@ -409,50 +406,6 @@ val id_to_list_def = Define`
                       | Long modN i' => modN::id_to_list i'
                       | Short conN => [conN]`;
 
-(* TODO: Delete *)
-val id_to_object_def = Define`
-    id_to_object ids = Array (MAP String (id_to_list ids))`
-
-(* TODO: Delete *)
-val tctor_to_json_def = Define`
-  (tctor_to_json (ast$TC_name tuple) =
-    let tuple' = id_to_object tuple in
-     Object [("TC_name", tuple')])
-  /\
-  (tctor_to_json TC_int = String "TC_int")
-  /\
-  (tctor_to_json TC_char = String "TC_char")
-  /\
-  (tctor_to_json TC_string = String "TC_string")
-  /\
-  (tctor_to_json TC_ref = String "TC_ref")
-  /\
-  (tctor_to_json TC_word8 = String "TC_word8")
-  /\
-  (tctor_to_json TC_word64 = String "TC_word64")
-  /\
-  (tctor_to_json TC_word8array = String "TC_word8array")
-  /\
-  (tctor_to_json TC_fn = String "TC_fn")
-  /\
-  (tctor_to_json TC_tup = String "TC_tup")
-  /\
-  (tctor_to_json TC_exn = String "TC_exp")
-  /\
-  (tctor_to_json TC_vector = String "TC_vector")
-  /\
-  (tctor_to_json TC_array = String "TC_array")`
-
-(* TODO: Delete *)
-val t_to_json_def = tDefine"t_to_json"`
-  (t_to_json (Tvar tvarN) = String tvarN)
-  /\
-  (t_to_json (Tvar_db n) = num_to_json n)
-  /\
-  (t_to_json (Tapp ts tctor) = Object [("Tapp", Array (MAP t_to_json ts));
-  ("tctor", tctor_to_json tctor)])`
-  cheat;
-
 val num_to_hex_digit_def = Define `
   num_to_hex_digit n =
     if n < 10 then [CHR (48 + n)] else
@@ -477,12 +430,6 @@ val lit_to_json_def = Define`
   /\
   (lit_to_json (Word64 w) = new_obj "Word64" [("value",  String (word_to_hex_string w))])`
 
-(* TODO: Delete *)
-val option_to_json_def = Define`
-  option_to_json opt = case opt of
-                          | NONE => Null
-                          | SOME opt' => String opt'`;
-
 (* Converts a structured expression to JSON *)
 val structured_to_json_def = tDefine"structured_to_json"`
   (structured_to_json (Tuple es) =
@@ -500,11 +447,12 @@ val structured_to_json_def = tDefine"structured_to_json"`
    (structured_to_json (List es) = Array (MAP structured_to_json es))`
       cheat;
 
-val num_to_structured_def = Define`
-  num_to_structured n = string_to_structured (num_to_str n)`;
-
+(* Helpers for converting pres to structured. *)
 val string_to_structured_def = Define`
   string_to_structured s = Item NONE s []`;
+
+val num_to_structured_def = Define`
+  num_to_structured n = string_to_structured (num_to_str n)`;
 
 val option_string_to_structured_def = Define`
   (option_string_to_structured opt = case opt of
@@ -553,140 +501,6 @@ val t_to_structured_def = tDefine"t_to_json"`
   /\
   (t_to_structured (Tapp ts tctor) = Item NONE "Tapp" [ List (MAP t_to_structured ts);
     tctor_to_structured tctor])`
-  cheat;
-
-(* Takes a presLang$exp and produces json$obj that mimics its structure. *)
-(* TODO: Delete *)
-val pres_to_json_def = tDefine"pres_to_json"`
-  (* Top level *)
-  (pres_to_json (presLang$Prog tops) =
-    let tops' = Array (MAP pres_to_json tops) in
-      new_obj "Prog" [("tops", tops')])
-  /\
-  (pres_to_json (Prompt modN decs) =
-    let decs' = Array (MAP pres_to_json decs) in
-    let modN' = option_to_json modN in
-      new_obj "Prompt" [("modN", modN'); ("decs", decs')])
-  /\
-  (pres_to_json (Dlet num exp) =
-      new_obj "Dlet" [("num", num_to_json num); ("exp", pres_to_json exp)])
-  /\
-  (pres_to_json (Dletrec lst) =
-    let fields = Array (MAP (\(v1, v2, exp) . Object [("var1", String v1); ("var2", String v2); ("exp", pres_to_json exp)]) lst) in
-      new_obj "Dletrec" [("exps", fields)])
-  /\
-  (pres_to_json (Dtype modNs) =
-    let modNs' = Array (MAP String modNs) in
-      new_obj "Dtype" [("modNs", modNs')])
-  /\
-  (pres_to_json (Dexn modNs conN ts) =
-    let modNs' = Array (MAP String modNs) in
-    let ts' = Array (MAP t_to_json ts) in
-      new_obj "Dexn" [("modNs", modNs'); ("con", String conN); ("ts", ts')])
-  /\
-  (pres_to_json (Pvar varN) =
-      new_obj "Pvar" [("varN", String varN)])
-  /\
-  (pres_to_json (Plit lit) =
-      new_obj "Plit" [("lit", lit_to_json lit)])
-  /\
-  (* TODO: Unify the two conjunctions for Pcon. *)
-  (pres_to_json (Pcon (Modlang_con con) exps) =
-    let exps' = ("pats", Array (MAP pres_to_json exps)) in
-    let ids' = case con of
-                  | NONE => ("modscon", Null)
-                  | SOME con' => ("modscon", (id_to_object con')) in
-      new_obj "Pcon-modLang" [ids'; exps'])
-  /\
-  (pres_to_json (Pcon (Conlang_con con) exps) =
-    let exps' = Array (MAP pres_to_json exps) in
-    let tup' = case con of
-                  | NONE => Null
-                  | SOME (num, te) => case te of
-                      | TypeId id => Array [num_to_json num; new_obj "TypeId" [("id", id_to_object id)]]
-                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn" [("id", id_to_object id)]]
-    in
-      new_obj "Pcon-conLang" [("numtid", tup'); ("pats", exps')])
-  /\
-  (pres_to_json (Pcon (Exhlang_con num) exps) =
-    let exps' = Array (MAP pres_to_json exps) in
-      new_obj "Pcon-exhlang" [("num", num_to_json num);("pats", exps')])
-  /\
-  (pres_to_json (Pref exp) =
-      new_obj "Pref" [("pat", pres_to_json exp)])
-  /\
-  (pres_to_json (Ptannot exp t) =
-      new_obj "Ptannot" [("pat", pres_to_json exp); ("t", t_to_json t)])
-  /\
-  (pres_to_json (Raise tra exp) =
-      new_obj "Raise" [("tra", trace_to_json tra); ("exp", pres_to_json exp)])
-  /\
-  (pres_to_json (Handle tra exp expsTup) =
-    let expsTup' = Array (MAP (\(e1, e2) . Object [
-      ("pat", pres_to_json e1);
-      ("exp", pres_to_json e2)
-    ]) expsTup) in
-      new_obj "Handle" [("tra", trace_to_json tra); ("exp", pres_to_json exp); ("exps", expsTup')])
-  /\
-  (pres_to_json (Var_local tra varN) =
-      new_obj "Var_local" [("tra", trace_to_json tra); ("varN", String varN)])
-  /\
-  (pres_to_json (Var_global tra num) =
-      new_obj "Var_global" [("tra", trace_to_json tra); ("num", num_to_json num)])
-  /\
-  (pres_to_json (Extend_global tra num) =
-      new_obj "Extend_global" [("tra", trace_to_json tra); ("num", num_to_json num)])
-  /\
-  (pres_to_json (Lit tra lit) =
-      new_obj "Lit" [("tra", trace_to_json tra); ("lit", lit_to_json lit)])
-  /\
-  (* TODO: Unify the two conjunctions for Con. *)
-  (pres_to_json (Con tra (Modlang_con con) exps) =
-    let exps' = ("exps", Array (MAP pres_to_json exps)) in
-    let ids' = case con of
-                  | NONE => ("modscon", Null)
-                  | SOME con' => ("modscon", (id_to_object con')) in
-      new_obj "Con-modLang" [("tra", trace_to_json tra); ids'; exps'])
-  /\
-  (pres_to_json (Con tra (Conlang_con con) exps) =
-    let exps' = Array (MAP pres_to_json exps) in
-    let tup' = case con of
-                  | NONE => Null
-                  | SOME (num, te) => case te of
-                      | TypeId id => Array [num_to_json num; new_obj "TypeId" [("id", id_to_object id)]]
-                      | TypeExn id => Array [num_to_json num; new_obj "TypeExn" [("id", id_to_object id)]] in
-      new_obj "Con-conLang" [("tra", trace_to_json tra); ("numtid", tup'); ("pats", exps')])
-  /\
-  (pres_to_json (App tra op exps) =
-    let exps' = ("exps", Array (MAP pres_to_json exps)) in
-      new_obj "App" [("tra", trace_to_json tra); ("op", op_to_json op); exps'])
-  /\
-  (pres_to_json (Fun tra varN exp) =
-      new_obj "Fun" [("tra", trace_to_json tra); ("varN", String varN); ("exp", pres_to_json exp)])
-  /\
-  (pres_to_json (Log tra lop exp1 exp2) =
-      new_obj "Log" [("tra", trace_to_json tra); ("lop", lop_to_json lop); ("exp1", pres_to_json exp1); ("exp2", pres_to_json exp2)])
-  /\
-  (pres_to_json (If tra exp1 exp2 exp3) =
-      new_obj "If" [("tra", trace_to_json tra); ("exp1", pres_to_json exp1); ("exp2", pres_to_json exp2); ("exp3", pres_to_json exp3)])
-  /\
-  (pres_to_json (Mat tra exp expsTup) =
-    let expsTup' = Array (MAP (\(e1, e2) . Object [("pat", pres_to_json e1); ("exp", pres_to_json e2)]) expsTup) in
-      new_obj "Mat" [("tra", trace_to_json tra); ("exp", pres_to_json exp); ("exps", expsTup')])
-  /\
-  (pres_to_json (Let tra varN exp1 exp2) =
-    let varN' = option_to_json varN in
-      new_obj "Let" [("tra", trace_to_json tra); ("varN", varN'); ("exp1", pres_to_json exp1); ("exp2", pres_to_json exp2)])
-  /\
-  (pres_to_json (Letrec tra varexpTup exp) =
-    let varexpTup' = Array (MAP (\(v1, v2, e) . Object [
-      ("var1", String v1);
-      ("var2", String v2);
-      ("exp", pres_to_json e)
-    ]) varexpTup) in
-      new_obj "Letrec" [("tra", trace_to_json tra); ("varsexp", varexpTup'); ("exp", pres_to_json exp)])
-  /\
-  (pres_to_json _ = Null)`
   cheat;
 
 val tid_or_exn_to_structured_def = Define`
@@ -804,7 +618,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
     ]) varexpTup) in
       Item (SOME tra) "Letrec" [varexpTup'; pres_to_structured exp])
   /\
-  (pres_to_structured _ = Item NONE "\"Unknown constructor\"")
+  (pres_to_structured _ = Item NONE "\"Unknown constructor\"" [])
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
