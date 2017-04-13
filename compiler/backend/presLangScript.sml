@@ -716,6 +716,12 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
     let modNs' = List (MAP string_to_structured modNs) in
     let ts' = List (MAP t_to_structured ts) in
       Item NONE "Dexn" [modNs'; string_to_structured conN;  ts'])
+  /\
+  (pres_to_structured (Pvar varN) =
+      Item NONE "Pvar" [string_to_structured varN])
+  /\
+  (pres_to_structured (Plit lit) =
+      Item NONE "Plit" [lit_to_structured lit])
 `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
