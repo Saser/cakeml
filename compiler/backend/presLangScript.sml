@@ -70,6 +70,13 @@ val _ = Datatype`
          is its parameter. *)
     | Letrec tra ((varN # varN # exp) list) exp`;
 
+(* Structured expression, an intermediate language between presLang and json, which strutcures the
+* presLang expressions in tu suitable JSON format. *)
+val _ = Datatype`
+  sExp =
+    | Tuple (sExp list)
+    | Item tra string (sExp list)`;
+
 (* Functions for converting intermediate languages to presLang. *)
 
 (* modLang *)
@@ -469,6 +476,17 @@ val option_to_json_def = Define`
   (option_to_json opt = case opt of
                       | NONE => Null
                       | SOME opt' => String opt')`
+
+(* Converts a structured expression to JSON *)
+val structured_to_json_def = tDefine"structured_to_json"`
+  (structured_to_json (Tuple es) =
+    let es' = MAP structured_to_json es in
+      Object [("isTuple", Bool T); ("elements", Array es')])
+  /\
+  (structured_to_json (Item tra name es) =
+    let es' = MAP structured_to_json es in
+      Object [("trace", (trace_to_json tra)); ("name", String name); ("args", Array es')])`
+      cheat;
 
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
 val pres_to_json_def = tDefine"pres_to_json"`
