@@ -20,20 +20,19 @@ val sIf_def = Define `
     (dtcase e1 of
      | Con _ t [] => if t = true_tag then e2 else e3
      | _ => If tra e1 e2 e3)`;
-(* TODO: Update sIf_pmatch to be consistent with traces
-* val sIf_pmatch = Q.store_thm("sIf_pmatch",`!e1 e2 e3.
-  sIf e1 e2 e3 =
+
+val sIf_pmatch = Q.store_thm("sIf_pmatch",`!e1 e2 e3.
+  sIf t e1 e2 e3 =
   if e2 = Bool T ∧ e3 = Bool F
     then e1
   else
     (case e1 of
-     | Con t [] => if t = true_tag then e2 else e3
-     | _ => If e1 e2 e3)`,
+     | Con _ t [] => if t = true_tag then e2 else e3
+     | _ => If t e1 e2 e3)`,
   rpt strip_tac
   >> every_case_tac
   >- fs[sIf_def]
-  >- (CONV_TAC(RAND_CONV patternMatchesLib.PMATCH_ELIM_CONV) >> every_case_tac
-  >> fs[sIf_def]));*)
+  >- (CONV_TAC(RAND_CONV patternMatchesLib.PMATCH_ELIM_CONV) >> every_case_tac >> fs[sIf_def]));
 
 val _ = Define `
   pure_op_op op ⇔
@@ -63,31 +62,31 @@ val _ = Define `
   (pure_op (El _) ⇔ T)`;
 
 val pure_def = Define `
-  (pure (Raise tra _) ⇔ F)
+  (pure (Raise _ _) ⇔ F)
   ∧
-  (pure (Handle tra e1 _) ⇔ pure e1)
+  (pure (Handle _ e1 _) ⇔ pure e1)
   ∧
-  (pure (Lit tra _) ⇔ T)
+  (pure (Lit _ _) ⇔ T)
   ∧
-  (pure (Con tra _ es) ⇔ pure_list es)
+  (pure (Con _ _ es) ⇔ pure_list es)
   ∧
-  (pure (Var_local tra _) ⇔ T)
+  (pure (Var_local _ _) ⇔ T)
   ∧
-  (pure (Var_global tra _) ⇔ T)
+  (pure (Var_global _ _) ⇔ T)
   ∧
-  (pure (Fun tra _) ⇔ T)
+  (pure (Fun _ _) ⇔ T)
   ∧
-  (pure (App tra op es) ⇔ pure_list es ∧ pure_op op)
+  (pure (App _ op es) ⇔ pure_list es ∧ pure_op op)
   ∧
-  (pure (If tra e1 e2 e3) ⇔ pure e1 ∧ pure e2 ∧ pure e3)
+  (pure (If _ e1 e2 e3) ⇔ pure e1 ∧ pure e2 ∧ pure e3)
   ∧
-  (pure (Let tra e1 e2) ⇔ pure e1 ∧ pure e2)
+  (pure (Let _ e1 e2) ⇔ pure e1 ∧ pure e2)
   ∧
-  (pure (Seq tra e1 e2) ⇔ pure e1 ∧ pure e2)
+  (pure (Seq _ e1 e2) ⇔ pure e1 ∧ pure e2)
   ∧
-  (pure (Letrec tra _ e) ⇔ pure e)
+  (pure (Letrec _ _ e) ⇔ pure e)
   ∧
-  (pure (Extend_global tra _) ⇔ F)
+  (pure (Extend_global _ _) ⇔ F)
   ∧
   (pure_list [] ⇔ T)
   ∧
@@ -99,31 +98,31 @@ val pure_list_EVERY = Q.store_thm("pure_list_EVERY",
 val _ = export_rewrites["pure_list_EVERY"]
 
 val ground_def = Define `
-  (ground n (Raise tra e) ⇔ ground n e)
+  (ground n (Raise _ e) ⇔ ground n e)
   ∧
-  (ground n (Handle tra e1 e2) ⇔ ground n e1 ∧ ground (n+1) e2)
+  (ground n (Handle _ e1 e2) ⇔ ground n e1 ∧ ground (n+1) e2)
   ∧
-  (ground _ (Lit tra _) ⇔ T)
+  (ground _ (Lit _ _) ⇔ T)
   ∧
-  (ground n (Con tra _ es) ⇔ ground_list n es)
+  (ground n (Con _ _ es) ⇔ ground_list n es)
   ∧
-  (ground n (Var_local tra k) ⇔ k < n)
+  (ground n (Var_local _ k) ⇔ k < n)
   ∧
-  (ground _ (Var_global tra _) ⇔ T)
+  (ground _ (Var_global _ _) ⇔ T)
   ∧
-  (ground _ (Fun tra _) ⇔ F)
+  (ground _ (Fun _ _) ⇔ F)
   ∧
-  (ground n (App tra _ es) ⇔ ground_list n es)
+  (ground n (App _ _ es) ⇔ ground_list n es)
   ∧
-  (ground n (If tra e1 e2 e3) ⇔ ground n e1 ∧ ground n e2 ∧ ground n e3)
+  (ground n (If _ e1 e2 e3) ⇔ ground n e1 ∧ ground n e2 ∧ ground n e3)
   ∧
-  (ground n (Let tra e1 e2) ⇔ ground n e1 ∧ ground (n+1) e2)
+  (ground n (Let _ e1 e2) ⇔ ground n e1 ∧ ground (n+1) e2)
   ∧
-  (ground n (Seq tra e1 e2) ⇔ ground n e1 ∧ ground n e2)
+  (ground n (Seq _ e1 e2) ⇔ ground n e1 ∧ ground n e2)
   ∧
-  (ground _ (Letrec tra _ _) ⇔ F)
+  (ground _ (Letrec _ _ _) ⇔ F)
   ∧
-  (ground _ (Extend_global tra _) ⇔ T)
+  (ground _ (Extend_global _ _) ⇔ T)
   ∧
   (ground_list _ [] ⇔ T)
   ∧
@@ -240,9 +239,7 @@ val _ = tDefine"compile_row"`
   ∧
   (compile_row _ bvs (Plit _) = (bvs, 0, I))
   ∧
-  (*TODO: Consider whether we actually need to mk_cons in the line below or if
-  * passing t on, as is, is fine *)
-  (compile_row t bvs (Pcon _ ps) = compile_cols (mk_cons t 1) bvs 0 0 ps)
+  (compile_row t bvs (Pcon _ ps) = compile_cols t bvs 0 0 ps)
   ∧
   (compile_row t bvs (Pref p) =
    let (bvs,m,f) = (compile_row (mk_cons t 1) (NONE::bvs) p) in
@@ -316,7 +313,7 @@ val compile_exp_def = tDefine"compile_exp"`
      (dtcase compile_row (mk_cons tra 3) bvs p of (bvs,_,f) => f (compile_exp bvs e) )
      (compile_pes (mk_cons tra 4) bvs pes))
   ∧
-  (compile_pes t _ _ = Lit (mk_cons t 1) (IntLit 0))`
+  (compile_pes t _ _ = Lit t (IntLit 0))`
   cheat;
   (*(WF_REL_TAC `inv_image $< (\x. dtcase x of INL (bvs,e) => exp_size e
                                          | INR (INL (bvs,es)) => exp6_size es
