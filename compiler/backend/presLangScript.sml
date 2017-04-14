@@ -243,11 +243,6 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
   cheat; 
 
 (* structured_to_json *)
-(* TODO: Add words *)
-
-val new_obj_def = Define`
-  new_obj cons fields = Object (("name", String cons)::fields)`;
-
 val lit_to_value_def = Define`
   (lit_to_value (IntLit i) = Int i)
   /\
@@ -256,13 +251,6 @@ val lit_to_value_def = Define`
   (lit_to_value (StrLit s) = String s)
   /\
   (lit_to_value _ = String "word8/64")`;
-
-(* Helpers for converting pres to structured. *)
-val string_to_structured_def = Define`
-  string_to_structured s = Item NONE s []`;
-
-val num_to_structured_def = Define`
-  num_to_structured n = string_to_structured (num_to_str n)`;
 
 val num_to_json_def = Define`
   num_to_json n = String (num_to_str n)`;
@@ -280,16 +268,34 @@ val trace_to_json_def = Define`
   * the top level of a trace. *)
   (trace_to_json None = Null)`;
 
+(* Converts a structured expression to JSON *)
+val structured_to_json_def = tDefine"structured_to_json"`
+  (structured_to_json (Tuple es) =
+    let es' = MAP structured_to_json es in
+      Object [("isTuple", Bool T); ("elements", Array es')])
+  /\
+  (structured_to_json (Item tra name es) =
+    let es' = MAP structured_to_json es in
+    let props = [("name", String name); ("args", Array es')] in
+    let props' = case tra of
+                   | NONE => props
+                   | SOME t => ("trace", trace_to_json t)::props in
+      Object props')
+   /\
+   (structured_to_json (List es) = Array (MAP structured_to_json es))`
+      cheat;
+
+(* Helpers for converting pres to structured. *)
+val string_to_structured_def = Define`
+  string_to_structured s = Item NONE s []`;
+
+val num_to_structured_def = Define`
+  num_to_structured n = string_to_structured (num_to_str n)`;
+
 val word_size_to_structured_def = Define`
   (word_size_to_structured W8 = Item NONE "W8" [])
   /\
   (word_size_to_structured W64 = Item NONE "W64" [])`;
-
-(*TODO: Delete *)
-val word_size_to_json_def = Define`
-  (word_size_to_json W8 = new_obj "W8" [])
-  /\
-  (word_size_to_json W64 = new_obj "W64" [])`;
 
 val opn_to_structured_def = Define`
   (opn_to_structured Plus = Item NONE "Plus" [])
@@ -302,18 +308,6 @@ val opn_to_structured_def = Define`
   /\
   (opn_to_structured Modulo = Item NONE "Modulo" [])`;
 
-(*TODO: Delete *)
-val opn_to_json_def = Define`
-  (opn_to_json Plus = new_obj "Plus" [])
-  /\
-  (opn_to_json Minus = new_obj "Minus" [])
-  /\
-  (opn_to_json Times = new_obj "Times" [])
-  /\
-  (opn_to_json Divide = new_obj "Divide" [])
-  /\
-  (opn_to_json Modulo = new_obj "Modulo" [])`;
-
 val opb_to_structured_def = Define`
   (opb_to_structured Lt = Item NONE "Lt" [])
   /\
@@ -322,16 +316,6 @@ val opb_to_structured_def = Define`
   (opb_to_structured Leq = Item NONE "Leq" [])
   /\
   (opb_to_structured Geq = Item NONE "Geq" [])`;
-
-(*TODO: Delete *)
-val opb_to_json_def = Define`
-  (opb_to_json Lt = new_obj "Lt" [])
-  /\
-  (opb_to_json Gt = new_obj "Gt" [])
-  /\
-  (opb_to_json Leq = new_obj "Leq" [])
-  /\
-  (opb_to_json Geq = new_obj "Geq" [])`;
 
 val opw_to_structured_def = Define`
   (opw_to_structured Andw = Item NONE "Andw" [])
@@ -344,18 +328,6 @@ val opw_to_structured_def = Define`
   /\
   (opw_to_structured Sub = Item NONE "Sub" [])`;
 
-(* TODO: Delete *)
-val opw_to_json_def = Define`
-  (opw_to_json Andw = new_obj "Andw" [])
-  /\
-  (opw_to_json Orw = new_obj "Orw" [])
-  /\
-  (opw_to_json Xor = new_obj "Xor" [])
-  /\
-  (opw_to_json Add = new_obj "Add" [])
-  /\
-  (opw_to_json Sub = new_obj "Sub" [])`;
-
 val shift_to_structured_def = Define`
   (shift_to_structured Lsl = Item NONE "Lsl" [])
   /\
@@ -365,17 +337,6 @@ val shift_to_structured_def = Define`
   /\
   (shift_to_structured Ror = Item NONE "Ror" [])`;
 
-(* TODO: Delete *)
-val shift_to_json_def = Define`
-  (shift_to_json Lsl = new_obj "Lsl" [])
-  /\
-  (shift_to_json Lsr = new_obj "Lsr" [])
-  /\
-  (shift_to_json Asr = new_obj "Asr" [])
-  /\
-  (shift_to_json Ror = new_obj "Ror" [])`;
-
-(* TODO: pres_to_structured uses `op_to_structured`. Implement that. *)
 val op_to_structured_def = Define`
   (op_to_structured (Conlang_op (Init_global_var num)) = Item NONE "Init_global_var" [num_to_structured num])
   /\
@@ -450,97 +411,12 @@ val op_to_structured_def = Define`
   /\
   (op_to_structured _ = Item NONE "Unknown" [])`;
 
-(* TODO: Delete *)
-val op_to_json_def = Define`
-  (op_to_json (Conlang_op (Init_global_var num)) = new_obj "Init_global_var" [("num", num_to_json num)])
-  /\
-  (op_to_json (Conlang_op (Op astop)) = new_obj "Op" [("op", op_to_json (Ast_op (astop)))])
-  /\
-  (op_to_json (Ast_op (Opn opn)) = new_obj "Opn" [("opn", opn_to_json opn)])
-  /\
-  (op_to_json (Ast_op (Opb opb)) = new_obj "Opb" [("opb", opb_to_json opb)])
-  /\
-  (op_to_json (Ast_op (Opw word_size opw)) = new_obj "Opw" [
-    ("word_size", word_size_to_json word_size);
-    ("opw", opw_to_json opw)
-  ])
-  /\
-  (op_to_json (Ast_op (Shift word_size shift num)) = new_obj "Shift" [
-    ("word_size", word_size_to_json word_size);
-    ("shift", shift_to_json shift);
-    ("num", num_to_json num)
-  ])
-  /\
-  (op_to_json (Ast_op Equality) = new_obj "Equality" [])
-  /\
-  (op_to_json (Ast_op Opapp) = new_obj "Opapp" [])
-  /\
-  (op_to_json (Ast_op Opassign) = new_obj "Opassign" [])
-  /\
-  (op_to_json (Ast_op Oprep) = new_obj "Oprep" [])
-  /\
-  (op_to_json (Ast_op Opderep) = new_obj "Opderep" [])
-  /\
-  (op_to_json (Ast_op Aw8alloc) = new_obj "Aw8alloc" [])
-  /\
-  (op_to_json (Ast_op Aw8sub) = new_obj "Aw8sub" [])
-  /\
-  (op_to_json (Ast_op Aw8length) = new_obj "Aw8length" [])
-  /\
-  (op_to_json (Ast_op Aw8update) = new_obj "Aw8update" [])
-  /\
-  (op_to_json (Ast_op (WordFromInt word_size)) = new_obj "WordFromInt" [
-    ("word_size", word_size_to_json word_size)
-  ])
-  /\
-  (op_to_json (Ast_op (WordToInt word_size)) = new_obj "WordToInt" [
-    ("word_size", word_size_to_json word_size)
-  ])
-  /\
-  (op_to_json (Ast_op Ord) = new_obj "Ord" [])
-  /\
-  (op_to_json (Ast_op Chr) = new_obj "Chr" [])
-  /\
-  (op_to_json (Ast_op (Chopb opb)) = new_obj "Chopb" [("opb", opb_to_json opb)])
-  /\
-  (op_to_json (Ast_op Implode) = new_obj "Implode" [])
-  /\
-  (op_to_json (Ast_op Strsub) = new_obj "Strsub" [])
-  /\
-  (op_to_json (Ast_op Strlen) = new_obj "Strlen" [])
-  /\
-  (op_to_json (Ast_op VfromList) = new_obj "VfromList" [])
-  /\
-  (op_to_json (Ast_op Vsub) = new_obj "Vsub" [])
-  /\
-  (op_to_json (Ast_op Vlength) = new_obj "Vlength" [])
-  /\
-  (op_to_json (Ast_op Aalloc) = new_obj "Aalloc" [])
-  /\
-  (op_to_json (Ast_op Asub) = new_obj "Asub" [])
-  /\
-  (op_to_json (Ast_op Alength) = new_obj "Alength" [])
-  /\
-  (op_to_json (Ast_op Aupdate) = new_obj "Aupdate" [])
-  /\
-  (op_to_json (Ast_op (FFI str)) = new_obj "FFI" [("str", String str)])
-  /\
-  (op_to_json _ = new_obj "Unknown" [])`;
-
 val lop_to_structured_def = Define`
   (lop_to_structured ast$And = string_to_structured "And")
   /\
   (lop_to_structured Or = string_to_structured "Or")
   /\
   (lop_to_structured _ = string_to_structured "Unknown")`
-
-(* TODO: Delete *)
-val lop_to_json_def = Define`
-  (lop_to_json ast$And = String "And")
-  /\
-  (lop_to_json Or = String "Or")
-  /\
-  (lop_to_json _ = String "Unknown")`
 
 val id_to_list_def = Define`
   id_to_list i = case i of
@@ -570,35 +446,6 @@ val lit_to_structured_def = Define`
   (lit_to_structured (Word8 w) = Item NONE "Word8" [string_to_structured (word_to_hex_string w)])
   /\
   (lit_to_structured (Word64 w) = Item NONE "Word64" [ string_to_structured (word_to_hex_string w)])`
-
-(* TODO: Delete *)
-val lit_to_json_def = Define`
-  (lit_to_json (IntLit i) = new_obj "IntLit" [("value", Int i)])
-  /\
-  (lit_to_json (Char c) = new_obj "Char" [("value", String [c])])
-  /\
-  (lit_to_json (StrLit s) = new_obj "StrLit" [("value", String s)])
-  /\
-  (lit_to_json (Word8 w) = new_obj "Word8" [("value", String (word_to_hex_string w))])
-  /\
-  (lit_to_json (Word64 w) = new_obj "Word64" [("value",  String (word_to_hex_string w))])`
-
-(* Converts a structured expression to JSON *)
-val structured_to_json_def = tDefine"structured_to_json"`
-  (structured_to_json (Tuple es) =
-    let es' = MAP structured_to_json es in
-      Object [("isTuple", Bool T); ("elements", Array es')])
-  /\
-  (structured_to_json (Item tra name es) =
-    let es' = MAP structured_to_json es in
-    let props = [("name", String name); ("args", Array es')] in
-    let props' = case tra of
-                   | NONE => props
-                   | SOME t => ("trace", trace_to_json t)::props in
-      Object props')
-   /\
-   (structured_to_json (List es) = Array (MAP structured_to_json es))`
-      cheat;
 
 val option_string_to_structured_def = Define`
   (option_string_to_structured opt = case opt of
@@ -768,7 +615,6 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
 * the name of the language and what fucntion to use to convert it to preslang to
 * obtain a function which takes a program in an intermediate language and
 * returns a JSON representation of that program. *)
-(* TODO: Make these use the pres_to_structured step. *)
 val lang_to_json_def = Define`
   lang_to_json langN func = 
     \ p . Object [
