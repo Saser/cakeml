@@ -527,9 +527,12 @@ val op_to_json_def = Define`
   /\
   (op_to_json _ = new_obj "Unknown" [])`;
 
-(* TODO: Change to lop_to_structured. *)
 val lop_to_structured_def = Define`
-  lop_to_structured _ = Item NONE "\"lop (unimplemented)\"" []`;
+  (lop_to_structured ast$And = string_to_structured "And")
+  /\
+  (lop_to_structured Or = string_to_structured "Or")
+  /\
+  (lop_to_structured _ = string_to_structured "Unknown")`
 
 (* TODO: Delete *)
 val lop_to_json_def = Define`
@@ -557,9 +560,16 @@ val num_to_hex_def = Define `
 val word_to_hex_string_def = Define `
   word_to_hex_string w = "0x" ++ num_to_hex (w2n (w:'a word))`;
 
-(* TODO: Change to lit_to_structured *)
 val lit_to_structured_def = Define`
-  lit_to_structured _ = Item NONE "\"lit (unimplemented)\"" []`;
+  (lit_to_structured (IntLit i) = Item NONE "IntLit" [string_to_structured (int_to_str i)])
+  /\
+  (lit_to_structured (Char c) = Item NONE "Char" [string_to_structured [c]])
+  /\
+  (lit_to_structured (StrLit s) = Item NONE "StrLit" [string_to_structured s])
+  /\
+  (lit_to_structured (Word8 w) = Item NONE "Word8" [string_to_structured (word_to_hex_string w)])
+  /\
+  (lit_to_structured (Word64 w) = Item NONE "Word64" [ string_to_structured (word_to_hex_string w)])`
 
 (* TODO: Delete *)
 val lit_to_json_def = Define`
