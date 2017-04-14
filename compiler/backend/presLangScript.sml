@@ -1,5 +1,5 @@
-open preamble astTheory jsonTheory backend_commonTheory;
-open conLangTheory modLangTheory exhLangTheory;
+open preamble astTheory;
+open conLangTheory modLangTheory exhLangTheory structuredLangTheory;
 
 val _ = new_theory"presLang";
 
@@ -7,8 +7,8 @@ val _ = new_theory"presLang";
 * presLang is a presentation language, encompassing many intermediate languages
 * of the compiler, adopting their constructors. The purpose of presLang is to be
 * an intermediate representation between an intermediate language of the
-* compiler and JSON. By translating an intermediate language to presLang, it can
-* be given a JSON representation by calling pres_to_json on the presLang
+* compiler and the structured language. By translating an intermediate language to presLang, it can
+* be given a structured representation by calling pres_to_strucutred on the presLang
 * representation. presLang has no semantics, as it is never evaluated, and may
 * therefore mix operators, declarations, patterns and expressions.
 *)
@@ -69,14 +69,6 @@ val _ = Datatype`
          The first varN is the function's name, and the second varN
          is its parameter. *)
     | Letrec tra ((varN # varN # exp) list) exp`;
-
-(* Structured expression, an intermediate language between presLang and json, which strutcures the
-* presLang expressions in tu suitable JSON format. *)
-val _ = Datatype`
-  sExp =
-    | Tuple (sExp list)
-    | Item (tra option) string (sExp list)
-    | List (sExp list)`;
 
 (* Functions for converting intermediate languages to presLang. *)
 
@@ -241,49 +233,6 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
   (exh_to_pres_pes ((p,e)::pes) =
     (exh_to_pres_pat p, exh_to_pres_exp e)::exh_to_pres_pes pes)`
   cheat; 
-
-(* structured_to_json *)
-val lit_to_value_def = Define`
-  (lit_to_value (IntLit i) = Int i)
-  /\
-  (lit_to_value (Char c) = String [c])
-  /\
-  (lit_to_value (StrLit s) = String s)
-  /\
-  (lit_to_value _ = String "word8/64")`;
-
-val num_to_json_def = Define`
-  num_to_json n = String (num_to_str n)`;
-
-val trace_to_json_def = Define`
-  (trace_to_json (backend_common$Cons tra num) =
-    Object [("name", String "Cons"); ("num", num_to_json num); ("trace", trace_to_json tra)])
-  /\
-  (trace_to_json (Union tra1 tra2) =
-      Object [("name", String "Union"); ("trace1", trace_to_json tra1); ("trace2", trace_to_json tra2)])
-  /\
-  (trace_to_json Empty = Object [("name", String "Empty")])
-  /\
-  (* TODO: cancel entire trace when None, or verify that None will always be at
-  * the top level of a trace. *)
-  (trace_to_json None = Null)`;
-
-(* Converts a structured expression to JSON *)
-val structured_to_json_def = tDefine"structured_to_json"`
-  (structured_to_json (Tuple es) =
-    let es' = MAP structured_to_json es in
-      Object [("isTuple", Bool T); ("elements", Array es')])
-  /\
-  (structured_to_json (Item tra name es) =
-    let es' = MAP structured_to_json es in
-    let props = [("name", String name); ("args", Array es')] in
-    let props' = case tra of
-                   | NONE => props
-                   | SOME t => ("trace", trace_to_json t)::props in
-      Object props')
-   /\
-   (structured_to_json (List es) = Array (MAP structured_to_json es))`
-      cheat;
 
 (* Helpers for converting pres to structured. *)
 val string_to_structured_def = Define`
