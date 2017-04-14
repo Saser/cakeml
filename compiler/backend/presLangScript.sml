@@ -257,6 +257,13 @@ val lit_to_value_def = Define`
   /\
   (lit_to_value _ = String "word8/64")`;
 
+(* Helpers for converting pres to structured. *)
+val string_to_structured_def = Define`
+  string_to_structured s = Item NONE s []`;
+
+val num_to_structured_def = Define`
+  num_to_structured n = string_to_structured (num_to_str n)`;
+
 val num_to_json_def = Define`
   num_to_json n = String (num_to_str n)`;
 
@@ -273,11 +280,29 @@ val trace_to_json_def = Define`
   * the top level of a trace. *)
   (trace_to_json None = Null)`;
 
+val word_size_to_structured_def = Define`
+  (word_size_to_structured W8 = Item NONE "W8" [])
+  /\
+  (word_size_to_structured W64 = Item NONE "W64" [])`;
+
+(*TODO: Delete *)
 val word_size_to_json_def = Define`
   (word_size_to_json W8 = new_obj "W8" [])
   /\
   (word_size_to_json W64 = new_obj "W64" [])`;
 
+val opn_to_structured_def = Define`
+  (opn_to_structured Plus = Item NONE "Plus" [])
+  /\
+  (opn_to_structured Minus = Item NONE "Minus" [])
+  /\
+  (opn_to_structured Times = Item NONE "Times" [])
+  /\
+  (opn_to_structured Divide = Item NONE "Divide" [])
+  /\
+  (opn_to_structured Modulo = Item NONE "Modulo" [])`;
+
+(*TODO: Delete *)
 val opn_to_json_def = Define`
   (opn_to_json Plus = new_obj "Plus" [])
   /\
@@ -289,6 +314,16 @@ val opn_to_json_def = Define`
   /\
   (opn_to_json Modulo = new_obj "Modulo" [])`;
 
+val opb_to_structured_def = Define`
+  (opb_to_structured Lt = Item NONE "Lt" [])
+  /\
+  (opb_to_structured Gt = Item NONE "Gt" [])
+  /\
+  (opb_to_structured Leq = Item NONE "Leq" [])
+  /\
+  (opb_to_structured Geq = Item NONE "Geq" [])`;
+
+(*TODO: Delete *)
 val opb_to_json_def = Define`
   (opb_to_json Lt = new_obj "Lt" [])
   /\
@@ -298,6 +333,18 @@ val opb_to_json_def = Define`
   /\
   (opb_to_json Geq = new_obj "Geq" [])`;
 
+val opw_to_structured_def = Define`
+  (opw_to_structured Andw = Item NONE "Andw" [])
+  /\
+  (opw_to_structured Orw = Item NONE "Orw" [])
+  /\
+  (opw_to_structured Xor = Item NONE "Xor" [])
+  /\
+  (opw_to_structured Add = Item NONE "Add" [])
+  /\
+  (opw_to_structured Sub = Item NONE "Sub" [])`;
+
+(* TODO: Delete *)
 val opw_to_json_def = Define`
   (opw_to_json Andw = new_obj "Andw" [])
   /\
@@ -309,6 +356,16 @@ val opw_to_json_def = Define`
   /\
   (opw_to_json Sub = new_obj "Sub" [])`;
 
+val shift_to_structured_def = Define`
+  (shift_to_structured Lsl = Item NONE "Lsl" [])
+  /\
+  (shift_to_structured Lsr = Item NONE "Lsr" [])
+  /\
+  (shift_to_structured Asr = Item NONE "Asr" [])
+  /\
+  (shift_to_structured Ror = Item NONE "Ror" [])`;
+
+(* TODO: Delete *)
 val shift_to_json_def = Define`
   (shift_to_json Lsl = new_obj "Lsl" [])
   /\
@@ -320,7 +377,78 @@ val shift_to_json_def = Define`
 
 (* TODO: pres_to_structured uses `op_to_structured`. Implement that. *)
 val op_to_structured_def = Define`
-  op_to_structured _ = Item NONE "\"op (unimplemented)\"" []`;
+  (op_to_structured (Conlang_op (Init_global_var num)) = Item NONE "Init_global_var" [num_to_structured num])
+  /\
+  (op_to_structured (Conlang_op (Op astop)) = Item NONE "Op" [op_to_structured (Ast_op (astop))])
+  /\
+  (op_to_structured (Ast_op (Opn opn)) = Item NONE "Opn" [opn_to_structured opn])
+  /\
+  (op_to_structured (Ast_op (Opb opb)) = Item NONE "Opb" [opb_to_structured opb])
+  /\
+  (op_to_structured (Ast_op (Opw word_size opw)) = Item NONE "Opw" [
+    word_size_to_structured word_size;
+    opw_to_structured opw
+  ])
+  /\
+  (op_to_structured (Ast_op (Shift word_size shift num)) = Item NONE "Shift" [
+    word_size_to_structured word_size;
+    shift_to_structured shift;
+    num_to_structured num
+  ])
+  /\
+  (op_to_structured (Ast_op Equality) = Item NONE "Equality" [])
+  /\
+  (op_to_structured (Ast_op Opapp) = Item NONE "Opapp" [])
+  /\
+  (op_to_structured (Ast_op Opassign) = Item NONE "Opassign" [])
+  /\
+  (op_to_structured (Ast_op Oprep) = Item NONE "Oprep" [])
+  /\
+  (op_to_structured (Ast_op Opderep) = Item NONE "Opderep" [])
+  /\
+  (op_to_structured (Ast_op Aw8alloc) = Item NONE "Aw8alloc" [])
+  /\
+  (op_to_structured (Ast_op Aw8sub) = Item NONE "Aw8sub" [])
+  /\
+  (op_to_structured (Ast_op Aw8length) = Item NONE "Aw8length" [])
+  /\
+  (op_to_structured (Ast_op Aw8update) = Item NONE "Aw8update" [])
+  /\
+  (op_to_structured (Ast_op (WordFromInt word_size)) = Item NONE "WordFromInt" [
+    word_size_to_structured word_size ])
+  /\
+  (op_to_structured (Ast_op (WordToInt word_size)) = Item NONE "WordToInt" [
+    word_size_to_structured word_size ])
+  /\
+  (op_to_structured (Ast_op Ord) = Item NONE "Ord" [])
+  /\
+  (op_to_structured (Ast_op Chr) = Item NONE "Chr" [])
+  /\
+  (op_to_structured (Ast_op (Chopb opb)) = Item NONE "Chopb" [opb_to_structured opb])
+  /\
+  (op_to_structured (Ast_op Implode) = Item NONE "Implode" [])
+  /\
+  (op_to_structured (Ast_op Strsub) = Item NONE "Strsub" [])
+  /\
+  (op_to_structured (Ast_op Strlen) = Item NONE "Strlen" [])
+  /\
+  (op_to_structured (Ast_op VfromList) = Item NONE "VfromList" [])
+  /\
+  (op_to_structured (Ast_op Vsub) = Item NONE "Vsub" [])
+  /\
+  (op_to_structured (Ast_op Vlength) = Item NONE "Vlength" [])
+  /\
+  (op_to_structured (Ast_op Aalloc) = Item NONE "Aalloc" [])
+  /\
+  (op_to_structured (Ast_op Asub) = Item NONE "Asub" [])
+  /\
+  (op_to_structured (Ast_op Alength) = Item NONE "Alength" [])
+  /\
+  (op_to_structured (Ast_op Aupdate) = Item NONE "Aupdate" [])
+  /\
+  (op_to_structured (Ast_op (FFI str)) = Item NONE "FFI" [string_to_structured str])
+  /\
+  (op_to_structured _ = Item NONE "Unknown" [])`;
 
 (* TODO: Delete *)
 val op_to_json_def = Define`
@@ -462,13 +590,6 @@ val structured_to_json_def = tDefine"structured_to_json"`
    (structured_to_json (List es) = Array (MAP structured_to_json es))`
       cheat;
 
-(* Helpers for converting pres to structured. *)
-val string_to_structured_def = Define`
-  string_to_structured s = Item NONE s []`;
-
-val num_to_structured_def = Define`
-  num_to_structured n = string_to_structured (num_to_str n)`;
-
 val option_string_to_structured_def = Define`
   (option_string_to_structured opt = case opt of
                       | NONE => Item NONE "NONE" []
@@ -505,9 +626,6 @@ val tctor_to_structured_def = Define`
   (tctor_to_structured TC_vector = string_to_structured "TC_vector")
   /\
   (tctor_to_structured TC_array = string_to_structured "TC_array")`
-
-val num_to_structured_def = Define`
-  num_to_structured n = Item NONE (num_to_str n) []`;
 
 val t_to_structured_def = tDefine"t_to_json"`
   (t_to_structured (Tvar tvarN) = Item NONE "Tvar" [string_to_structured tvarN])
