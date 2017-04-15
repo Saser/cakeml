@@ -7,10 +7,11 @@ val _ = new_theory"presLang";
 * presLang is a presentation language, encompassing many intermediate languages
 * of the compiler, adopting their constructors. The purpose of presLang is to be
 * an intermediate representation between an intermediate language of the
-* compiler and the structured language. By translating an intermediate language to presLang, it can
-* be given a structured representation by calling pres_to_strucutred on the presLang
-* representation. presLang has no semantics, as it is never evaluated, and may
-* therefore mix operators, declarations, patterns and expressions.
+* compiler and the structured language. By translating an intermediate language
+* to presLang, it can be given a structured representation by calling
+* pres_to_strucutred on the presLang representation. presLang has no semantics,
+* as it is never evaluated, and may therefore mix operators, declarations,
+* patterns and expressions.
 *)
 
 (* Special operator wrapper for presLang *)
@@ -157,7 +158,7 @@ val con_to_pres_exp_def = tDefine"con_to_pres_exp"`
   (con_to_pres_exp (Lit t l) = Lit t l)
   /\
   (con_to_pres_exp (Con t ntOpt exps) = Con t (Conlang_con ntOpt) (MAP con_to_pres_exp exps))
-  /\ 
+  /\
   (con_to_pres_exp (Var_local t varN) = Var_local t varN)
   /\
   (con_to_pres_exp (Var_global t num) = Var_global t num)
@@ -203,8 +204,8 @@ val exh_to_pres_pat_def = tDefine"exh_to_pres_pat"`
        | Pref pat => Pref (exh_to_pres_pat pat)`
     cheat;
 
-val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"` 
-  (exh_to_pres_exp (exhLang$Raise t e) = Raise t (exh_to_pres_exp e)) 
+val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
+  (exh_to_pres_exp (exhLang$Raise t e) = Raise t (exh_to_pres_exp e))
   /\
   (exh_to_pres_exp (Handle t e pes) = Handle t (exh_to_pres_exp e) (exh_to_pres_pes pes))
   /\
@@ -219,10 +220,10 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
   (exh_to_pres_exp (Fun t varN e) = Fun t varN (exh_to_pres_exp e))
   /\
   (exh_to_pres_exp (App t op es) = App t (Conlang_op op) (MAP exh_to_pres_exp es))
-  /\ 
-  (exh_to_pres_exp (Mat t e pes) = Mat t (exh_to_pres_exp e) (exh_to_pres_pes pes)) 
   /\
-  (exh_to_pres_exp (Let t varN e1 e2) = Let t varN (exh_to_pres_exp e1) (exh_to_pres_exp e2)) 
+  (exh_to_pres_exp (Mat t e pes) = Mat t (exh_to_pres_exp e) (exh_to_pres_pes pes))
+  /\
+  (exh_to_pres_exp (Let t varN e1 e2) = Let t varN (exh_to_pres_exp e1) (exh_to_pres_exp e2))
   /\
   (exh_to_pres_exp (Letrec t funs e1) = Letrec t (MAP (\(v1,v2,e).(v1,v2,exh_to_pres_exp e)) funs) (exh_to_pres_exp e1))
   /\
@@ -232,7 +233,7 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
   /\
   (exh_to_pres_pes ((p,e)::pes) =
     (exh_to_pres_pat p, exh_to_pres_exp e)::exh_to_pres_pes pes)`
-  cheat; 
+  cheat;
 
 (* Helpers for converting pres to structured. *)
 val string_to_structured_def = Define`
@@ -324,17 +325,18 @@ val op_to_structured_def = Define`
   /\
   (op_to_structured (Ast_op Aw8update) = Item NONE "Aw8update" [])
   /\
-  (op_to_structured (Ast_op (WordFromInt word_size)) = Item NONE "WordFromInt" [
-    word_size_to_structured word_size ])
+  (op_to_structured (Ast_op (WordFromInt word_size)) =
+    Item NONE "WordFromInt" [ word_size_to_structured word_size ])
   /\
-  (op_to_structured (Ast_op (WordToInt word_size)) = Item NONE "WordToInt" [
-    word_size_to_structured word_size ])
+  (op_to_structured (Ast_op (WordToInt word_size)) =
+    Item NONE "WordToInt" [ word_size_to_structured word_size ])
   /\
   (op_to_structured (Ast_op Ord) = Item NONE "Ord" [])
   /\
   (op_to_structured (Ast_op Chr) = Item NONE "Chr" [])
   /\
-  (op_to_structured (Ast_op (Chopb opb)) = Item NONE "Chopb" [opb_to_structured opb])
+  (op_to_structured (Ast_op (Chopb opb)) =
+    Item NONE "Chopb" [opb_to_structured opb])
   /\
   (op_to_structured (Ast_op Implode) = Item NONE "Implode" [])
   /\
@@ -356,7 +358,8 @@ val op_to_structured_def = Define`
   /\
   (op_to_structured (Ast_op Aupdate) = Item NONE "Aupdate" [])
   /\
-  (op_to_structured (Ast_op (FFI str)) = Item NONE "FFI" [string_to_structured str])
+  (op_to_structured (Ast_op (FFI str)) =
+    Item NONE "FFI" [string_to_structured str])
   /\
   (op_to_structured _ = Item NONE "Unknown" [])`;
 
@@ -365,7 +368,7 @@ val lop_to_structured_def = Define`
   /\
   (lop_to_structured Or = string_to_structured "Or")
   /\
-  (lop_to_structured _ = string_to_structured "Unknown")`
+  (lop_to_structured _ = string_to_structured "Unknown")`;
 
 val id_to_list_def = Define`
   id_to_list i = case i of
@@ -386,15 +389,20 @@ val word_to_hex_string_def = Define `
   word_to_hex_string w = "0x" ++ num_to_hex (w2n (w:'a word))`;
 
 val lit_to_structured_def = Define`
-  (lit_to_structured (IntLit i) = Item NONE "IntLit" [string_to_structured (int_to_str i)])
+  (lit_to_structured (IntLit i) =
+    Item NONE "IntLit" [string_to_structured (int_to_str i)])
   /\
-  (lit_to_structured (Char c) = Item NONE "Char" [string_to_structured [c]])
+  (lit_to_structured (Char c) =
+    Item NONE "Char" [string_to_structured [c]])
   /\
-  (lit_to_structured (StrLit s) = Item NONE "StrLit" [string_to_structured s])
+  (lit_to_structured (StrLit s) =
+    Item NONE "StrLit" [string_to_structured s])
   /\
-  (lit_to_structured (Word8 w) = Item NONE "Word8" [string_to_structured (word_to_hex_string w)])
+  (lit_to_structured (Word8 w) =
+    Item NONE "Word8" [string_to_structured (word_to_hex_string w)])
   /\
-  (lit_to_structured (Word64 w) = Item NONE "Word64" [ string_to_structured (word_to_hex_string w)])`
+  (lit_to_structured (Word64 w) =
+    Item NONE "Word64" [string_to_structured (word_to_hex_string w)])`;
 
 val option_string_to_structured_def = Define`
   (option_string_to_structured opt = case opt of
@@ -457,8 +465,8 @@ val conf_to_structured_def = Define`
          | Modlang_con NONE => none
          | Conlang_con NONE => none
          | Modlang_con (SOME id) => Item NONE "SOME" [id_to_structured id]
-         | Conlang_con (SOME (n,t)) => Item NONE "SOME" [Tuple [num_to_structured
-         n; tid_or_exn_to_structured t]]
+         | Conlang_con (SOME (n,t)) =>
+            Item NONE "SOME" [Tuple [num_to_structured n; tid_or_exn_to_structured t]]
          | Exhlang_con c => Item NONE "SOME" [num_to_structured c]`;
 
 (* Takes a presLang$exp and produces json$obj that mimics its structure. *)
@@ -477,7 +485,8 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       Item NONE "Dlet" [num_to_structured num; pres_to_structured exp])
   /\
   (pres_to_structured (Dletrec lst) =
-    let fields = List (MAP (\ (v1, v2, exp) . Tuple [string_to_structured v1; string_to_structured v2; pres_to_structured exp]) lst) in
+    let fields =
+      List (MAP (\ (v1, v2, exp) . Tuple [string_to_structured v1; string_to_structured v2; pres_to_structured exp]) lst) in
       Item NONE "Dletrec" [fields] )
   /\
   (pres_to_structured (Dtype modNs) =
@@ -565,7 +574,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
 * obtain a function which takes a program in an intermediate language and
 * returns a JSON representation of that program. *)
 val lang_to_json_def = Define`
-  lang_to_json langN func = 
+  lang_to_json langN func =
     \ p . Object [
       ("lang", String langN);
       ("prog", structured_to_json (pres_to_structured (func p)))]`;
