@@ -359,9 +359,7 @@ val op_to_structured_def = Define`
   (op_to_structured (Ast_op Aupdate) = Item NONE "Aupdate" [])
   /\
   (op_to_structured (Ast_op (FFI str)) =
-    Item NONE "FFI" [string_to_structured str])
-  /\
-  (op_to_structured _ = Item NONE "Unknown" [])`;
+    Item NONE "FFI" [string_to_structured str])`;
 
 val lop_to_structured_def = Define`
   (lop_to_structured ast$And = string_to_structured "And")
@@ -565,8 +563,6 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       pres_to_structured e
     ]) varexpTup) in
       Item (SOME tra) "Letrec" [varexpTup'; pres_to_structured exp])
-  /\
-  (pres_to_structured _ = Item NONE "\"Unknown constructor\"" [])
   `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
