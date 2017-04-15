@@ -17,15 +17,6 @@ val _ = Datatype`
     | List (sExp list)`;
 
 (* structured_to_json *)
-val lit_to_value_def = Define`
-  (lit_to_value (IntLit i) = Int i)
-  /\
-  (lit_to_value (Char c) = String [c])
-  /\
-  (lit_to_value (StrLit s) = String s)
-  /\
-  (lit_to_value _ = String "word8/64")`;
-
 val num_to_json_def = Define`
   num_to_json n = String (num_to_str n)`;
 
