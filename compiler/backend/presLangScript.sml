@@ -243,7 +243,7 @@ val string_to_structured_def = Define`
   string_to_structured s = empty_item ("\"" ++ s ++ "\"")`;
 
 val num_to_structured_def = Define`
-  num_to_structured n = string_to_structured (num_to_str n)`;
+  num_to_structured n = empty_item (num_to_str n)`;
 
 val word_size_to_structured_def = Define`
   (word_size_to_structured W8 = empty_item "W8")
@@ -365,16 +365,11 @@ val op_to_structured_def = Define`
     Item NONE "FFI" [string_to_structured str])`;
 
 val lop_to_structured_def = Define`
-  (lop_to_structured ast$And = string_to_structured "And")
+  (lop_to_structured ast$And = empty_item "And")
   /\
-  (lop_to_structured Or = string_to_structured "Or")
+  (lop_to_structured Or = empty_item "Or")
   /\
-  (lop_to_structured _ = string_to_structured "Unknown")`;
-
-val id_to_list_def = Define`
-  id_to_list i = case i of
-                      | Long modN i' => modN::id_to_list i'
-                      | Short conN => [conN]`;
+  (lop_to_structured _ = empty_item "Unknown")`;
 
 val num_to_hex_digit_def = Define `
   num_to_hex_digit n =
@@ -391,7 +386,7 @@ val word_to_hex_string_def = Define `
 
 val lit_to_structured_def = Define`
   (lit_to_structured (IntLit i) =
-    Item NONE "IntLit" [string_to_structured (int_to_str i)])
+    Item NONE "IntLit" [empty_item (int_to_str i)])
   /\
   (lit_to_structured (Char c) =
     Item NONE "Char" [string_to_structured [c]])
@@ -400,47 +395,49 @@ val lit_to_structured_def = Define`
     Item NONE "StrLit" [string_to_structured s])
   /\
   (lit_to_structured (Word8 w) =
-    Item NONE "Word8" [string_to_structured (word_to_hex_string w)])
+    Item NONE "Word8" [empty_item (word_to_hex_string w)])
   /\
   (lit_to_structured (Word64 w) =
-    Item NONE "Word64" [string_to_structured (word_to_hex_string w)])`;
+    Item NONE "Word64" [empty_item (word_to_hex_string w)])`;
 
 val option_string_to_structured_def = Define`
   (option_string_to_structured opt = case opt of
                       | NONE => empty_item "NONE"
-                      | SOME opt' => string_to_structured opt')`
+                      | SOME opt' => Item NONE "SOME" [string_to_structured opt'])`
 
 val id_to_structured_def = Define`
-    id_to_structured ids = List (MAP string_to_structured (id_to_list ids))`
+  (id_to_structured (Long name i) = Item NONE "Long" [id_to_structured i; string_to_structured name])
+  /\
+  (id_to_structured (Short name) = Item NONE "Short" [string_to_structured name])`;
 
 val tctor_to_structured_def = Define`
   (tctor_to_structured (ast$TC_name ids) =
     let ids' = id_to_structured ids in
       Item NONE "TC_name" [ids'])
   /\
-  (tctor_to_structured TC_int = string_to_structured "TC_int")
+  (tctor_to_structured TC_int = empty_item "TC_int")
   /\
-  (tctor_to_structured TC_char = string_to_structured "TC_char")
+  (tctor_to_structured TC_char = empty_item "TC_char")
   /\
-  (tctor_to_structured TC_string = string_to_structured "TC_string")
+  (tctor_to_structured TC_string = empty_item "TC_string")
   /\
-  (tctor_to_structured TC_ref = string_to_structured "TC_ref")
+  (tctor_to_structured TC_ref = empty_item "TC_ref")
   /\
-  (tctor_to_structured TC_word8 = string_to_structured "TC_word8")
+  (tctor_to_structured TC_word8 = empty_item "TC_word8")
   /\
-  (tctor_to_structured TC_word64 = string_to_structured "TC_word64")
+  (tctor_to_structured TC_word64 = empty_item "TC_word64")
   /\
-  (tctor_to_structured TC_word8array = string_to_structured "TC_word8array")
+  (tctor_to_structured TC_word8array = empty_item "TC_word8array")
   /\
-  (tctor_to_structured TC_fn = string_to_structured "TC_fn")
+  (tctor_to_structured TC_fn = empty_item "TC_fn")
   /\
-  (tctor_to_structured TC_tup = string_to_structured "TC_tup")
+  (tctor_to_structured TC_tup = empty_item "TC_tup")
   /\
-  (tctor_to_structured TC_exn = string_to_structured "TC_exp")
+  (tctor_to_structured TC_exn = empty_item "TC_exp")
   /\
-  (tctor_to_structured TC_vector = string_to_structured "TC_vector")
+  (tctor_to_structured TC_vector = empty_item "TC_vector")
   /\
-  (tctor_to_structured TC_array = string_to_structured "TC_array")`
+  (tctor_to_structured TC_array = empty_item "TC_array")`
 
 val t_to_structured_def = tDefine"t_to_json"`
   (t_to_structured (Tvar tvarN) = Item NONE "Tvar" [string_to_structured tvarN])
