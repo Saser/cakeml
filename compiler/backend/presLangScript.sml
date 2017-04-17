@@ -237,7 +237,7 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
 
 (* Helpers for converting pres to structured. *)
 val string_to_structured_def = Define`
-  string_to_structured s = Item NONE s []`;
+  string_to_structured s = Item NONE ("\"" ++ s ++ "\"") []`;
 
 val num_to_structured_def = Define`
   num_to_structured n = string_to_structured (num_to_str n)`;
