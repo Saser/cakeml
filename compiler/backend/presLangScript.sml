@@ -98,11 +98,11 @@ val mod_to_pres_exp_def = tDefine"mod_to_pres_exp"`
   /\
   (mod_to_pres_exp (Var_local tra varN) = Var_local tra varN)
   /\
-  (mod_to_pres_exp (Var_global tra num) =  Var_global tra num)
+  (mod_to_pres_exp (Var_global tra num) = Var_global tra num)
   /\
-  (mod_to_pres_exp (Fun tra varN exp) =  Fun tra varN (mod_to_pres_exp exp))
+  (mod_to_pres_exp (Fun tra varN exp) = Fun tra varN (mod_to_pres_exp exp))
   /\
-  (mod_to_pres_exp (App tra op exps) =  App tra (Ast_op op) (MAP mod_to_pres_exp exps))
+  (mod_to_pres_exp (App tra op exps) = App tra (Ast_op op) (MAP mod_to_pres_exp exps))
   /\
   (mod_to_pres_exp (If tra exp1 exp2 exp3) =
     If tra (mod_to_pres_exp exp1) (mod_to_pres_exp exp2) (mod_to_pres_exp exp3))
@@ -329,10 +329,10 @@ val op_to_structured_def = Define`
   (op_to_structured (Ast_op Aw8update) = empty_item "Aw8update")
   /\
   (op_to_structured (Ast_op (WordFromInt word_size)) =
-    Item NONE "WordFromInt" [ word_size_to_structured word_size ])
+    Item NONE "WordFromInt" [word_size_to_structured word_size])
   /\
   (op_to_structured (Ast_op (WordToInt word_size)) =
-    Item NONE "WordToInt" [ word_size_to_structured word_size ])
+    Item NONE "WordToInt" [word_size_to_structured word_size])
   /\
   (op_to_structured (Ast_op Ord) = empty_item "Ord")
   /\
@@ -444,15 +444,14 @@ val t_to_structured_def = tDefine"t_to_json"`
   /\
   (t_to_structured (Tvar_db n) = Item NONE "Tvar_db" [num_to_structured n])
   /\
-  (t_to_structured (Tapp ts tctor) = Item NONE "Tapp" [ List (MAP t_to_structured ts);
-    tctor_to_structured tctor])`
+  (t_to_structured (Tapp ts tctor) = Item NONE "Tapp" [List (MAP t_to_structured ts); tctor_to_structured tctor])`
   cheat;
 
 val tid_or_exn_to_structured_def = Define`
   tid_or_exn_to_structured te =
    let (name, id) =
      case te of
-       | TypeId id =>  ("TypeId", id)
+       | TypeId id => ("TypeId", id)
        | TypeExn id => ("TypeExn", id) in
      Item NONE name [id_to_structured id]`;
 
@@ -494,7 +493,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
   (pres_to_structured (Dexn modNs conN ts) =
     let modNs' = List (MAP string_to_structured modNs) in
     let ts' = List (MAP t_to_structured ts) in
-      Item NONE "Dexn" [modNs'; string_to_structured conN;  ts'])
+      Item NONE "Dexn" [modNs'; string_to_structured conN; ts'])
   /\
   (pres_to_structured (Pvar varN) =
       Item NONE "Pvar" [string_to_structured varN])
@@ -516,7 +515,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       Item (SOME tra) "Raise" [pres_to_structured exp])
   /\
   (pres_to_structured (Handle tra exp expsTup) =
-    let expsTup' = List (MAP (\(e1, e2) . Tuple [ pres_to_structured e1; pres_to_structured e2 ]) expsTup) in
+    let expsTup' = List (MAP (\(e1, e2) . Tuple [pres_to_structured e1; pres_to_structured e2]) expsTup) in
       Item (SOME tra) "Handle" [pres_to_structured exp; expsTup'])
   /\
   (pres_to_structured (Var_local tra varN) =
@@ -549,7 +548,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       Item (SOME tra) "If" [pres_to_structured exp1; pres_to_structured exp2; pres_to_structured exp3])
   /\
   (pres_to_structured (Mat tra exp expsTup) =
-    let expsTup' = List (MAP (\(e1, e2) . Tuple [ pres_to_structured e1; pres_to_structured e2 ]) expsTup) in
+    let expsTup' = List (MAP (\(e1, e2) . Tuple [pres_to_structured e1; pres_to_structured e2]) expsTup) in
       Item (SOME tra) "Mat" [pres_to_structured exp; expsTup'])
   /\
   (pres_to_structured (Let tra varN exp1 exp2) =
