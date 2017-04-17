@@ -236,56 +236,59 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
   cheat;
 
 (* Helpers for converting pres to structured. *)
+val empty_item_def = Define`
+  empty_item name = Item NONE name []`;
+
 val string_to_structured_def = Define`
-  string_to_structured s = Item NONE ("\"" ++ s ++ "\"") []`;
+  string_to_structured s = empty_item ("\"" ++ s ++ "\"")`;
 
 val num_to_structured_def = Define`
   num_to_structured n = string_to_structured (num_to_str n)`;
 
 val word_size_to_structured_def = Define`
-  (word_size_to_structured W8 = Item NONE "W8" [])
+  (word_size_to_structured W8 = empty_item "W8")
   /\
-  (word_size_to_structured W64 = Item NONE "W64" [])`;
+  (word_size_to_structured W64 = empty_item "W64")`;
 
 val opn_to_structured_def = Define`
-  (opn_to_structured Plus = Item NONE "Plus" [])
+  (opn_to_structured Plus = empty_item "Plus")
   /\
-  (opn_to_structured Minus = Item NONE "Minus" [])
+  (opn_to_structured Minus = empty_item "Minus")
   /\
-  (opn_to_structured Times = Item NONE "Times" [])
+  (opn_to_structured Times = empty_item "Times")
   /\
-  (opn_to_structured Divide = Item NONE "Divide" [])
+  (opn_to_structured Divide = empty_item "Divide")
   /\
-  (opn_to_structured Modulo = Item NONE "Modulo" [])`;
+  (opn_to_structured Modulo = empty_item "Modulo")`;
 
 val opb_to_structured_def = Define`
-  (opb_to_structured Lt = Item NONE "Lt" [])
+  (opb_to_structured Lt = empty_item "Lt")
   /\
-  (opb_to_structured Gt = Item NONE "Gt" [])
+  (opb_to_structured Gt = empty_item "Gt")
   /\
-  (opb_to_structured Leq = Item NONE "Leq" [])
+  (opb_to_structured Leq = empty_item "Leq")
   /\
-  (opb_to_structured Geq = Item NONE "Geq" [])`;
+  (opb_to_structured Geq = empty_item "Geq")`;
 
 val opw_to_structured_def = Define`
-  (opw_to_structured Andw = Item NONE "Andw" [])
+  (opw_to_structured Andw = empty_item "Andw")
   /\
-  (opw_to_structured Orw = Item NONE "Orw" [])
+  (opw_to_structured Orw = empty_item "Orw")
   /\
-  (opw_to_structured Xor = Item NONE "Xor" [])
+  (opw_to_structured Xor = empty_item "Xor")
   /\
-  (opw_to_structured Add = Item NONE "Add" [])
+  (opw_to_structured Add = empty_item "Add")
   /\
-  (opw_to_structured Sub = Item NONE "Sub" [])`;
+  (opw_to_structured Sub = empty_item "Sub")`;
 
 val shift_to_structured_def = Define`
-  (shift_to_structured Lsl = Item NONE "Lsl" [])
+  (shift_to_structured Lsl = empty_item "Lsl")
   /\
-  (shift_to_structured Lsr = Item NONE "Lsr" [])
+  (shift_to_structured Lsr = empty_item "Lsr")
   /\
-  (shift_to_structured Asr = Item NONE "Asr" [])
+  (shift_to_structured Asr = empty_item "Asr")
   /\
-  (shift_to_structured Ror = Item NONE "Ror" [])`;
+  (shift_to_structured Ror = empty_item "Ror")`;
 
 val op_to_structured_def = Define`
   (op_to_structured (Conlang_op (Init_global_var num)) = Item NONE "Init_global_var" [num_to_structured num])
@@ -307,23 +310,23 @@ val op_to_structured_def = Define`
     num_to_structured num
   ])
   /\
-  (op_to_structured (Ast_op Equality) = Item NONE "Equality" [])
+  (op_to_structured (Ast_op Equality) = empty_item "Equality")
   /\
-  (op_to_structured (Ast_op Opapp) = Item NONE "Opapp" [])
+  (op_to_structured (Ast_op Opapp) = empty_item "Opapp")
   /\
-  (op_to_structured (Ast_op Opassign) = Item NONE "Opassign" [])
+  (op_to_structured (Ast_op Opassign) = empty_item "Opassign")
   /\
-  (op_to_structured (Ast_op Oprep) = Item NONE "Oprep" [])
+  (op_to_structured (Ast_op Oprep) = empty_item "Oprep")
   /\
-  (op_to_structured (Ast_op Opderep) = Item NONE "Opderep" [])
+  (op_to_structured (Ast_op Opderep) = empty_item "Opderep")
   /\
-  (op_to_structured (Ast_op Aw8alloc) = Item NONE "Aw8alloc" [])
+  (op_to_structured (Ast_op Aw8alloc) = empty_item "Aw8alloc")
   /\
-  (op_to_structured (Ast_op Aw8sub) = Item NONE "Aw8sub" [])
+  (op_to_structured (Ast_op Aw8sub) = empty_item "Aw8sub")
   /\
-  (op_to_structured (Ast_op Aw8length) = Item NONE "Aw8length" [])
+  (op_to_structured (Ast_op Aw8length) = empty_item "Aw8length")
   /\
-  (op_to_structured (Ast_op Aw8update) = Item NONE "Aw8update" [])
+  (op_to_structured (Ast_op Aw8update) = empty_item "Aw8update")
   /\
   (op_to_structured (Ast_op (WordFromInt word_size)) =
     Item NONE "WordFromInt" [ word_size_to_structured word_size ])
@@ -331,32 +334,32 @@ val op_to_structured_def = Define`
   (op_to_structured (Ast_op (WordToInt word_size)) =
     Item NONE "WordToInt" [ word_size_to_structured word_size ])
   /\
-  (op_to_structured (Ast_op Ord) = Item NONE "Ord" [])
+  (op_to_structured (Ast_op Ord) = empty_item "Ord")
   /\
-  (op_to_structured (Ast_op Chr) = Item NONE "Chr" [])
+  (op_to_structured (Ast_op Chr) = empty_item "Chr")
   /\
   (op_to_structured (Ast_op (Chopb opb)) =
     Item NONE "Chopb" [opb_to_structured opb])
   /\
-  (op_to_structured (Ast_op Implode) = Item NONE "Implode" [])
+  (op_to_structured (Ast_op Implode) = empty_item "Implode")
   /\
-  (op_to_structured (Ast_op Strsub) = Item NONE "Strsub" [])
+  (op_to_structured (Ast_op Strsub) = empty_item "Strsub")
   /\
-  (op_to_structured (Ast_op Strlen) = Item NONE "Strlen" [])
+  (op_to_structured (Ast_op Strlen) = empty_item "Strlen")
   /\
-  (op_to_structured (Ast_op VfromList) = Item NONE "VfromList" [])
+  (op_to_structured (Ast_op VfromList) = empty_item "VfromList")
   /\
-  (op_to_structured (Ast_op Vsub) = Item NONE "Vsub" [])
+  (op_to_structured (Ast_op Vsub) = empty_item "Vsub")
   /\
-  (op_to_structured (Ast_op Vlength) = Item NONE "Vlength" [])
+  (op_to_structured (Ast_op Vlength) = empty_item "Vlength")
   /\
-  (op_to_structured (Ast_op Aalloc) = Item NONE "Aalloc" [])
+  (op_to_structured (Ast_op Aalloc) = empty_item "Aalloc")
   /\
-  (op_to_structured (Ast_op Asub) = Item NONE "Asub" [])
+  (op_to_structured (Ast_op Asub) = empty_item "Asub")
   /\
-  (op_to_structured (Ast_op Alength) = Item NONE "Alength" [])
+  (op_to_structured (Ast_op Alength) = empty_item "Alength")
   /\
-  (op_to_structured (Ast_op Aupdate) = Item NONE "Aupdate" [])
+  (op_to_structured (Ast_op Aupdate) = empty_item "Aupdate")
   /\
   (op_to_structured (Ast_op (FFI str)) =
     Item NONE "FFI" [string_to_structured str])`;
@@ -404,7 +407,7 @@ val lit_to_structured_def = Define`
 
 val option_string_to_structured_def = Define`
   (option_string_to_structured opt = case opt of
-                      | NONE => Item NONE "NONE" []
+                      | NONE => empty_item "NONE"
                       | SOME opt' => string_to_structured opt')`
 
 val id_to_structured_def = Define`
@@ -458,7 +461,7 @@ val tid_or_exn_to_structured_def = Define`
 
 val conf_to_structured_def = Define`
   conf_to_structured con =
-    let none = Item NONE "NONE" [] in
+    let none = empty_item "NONE" in
       case con of
          | Modlang_con NONE => none
          | Conlang_con NONE => none
