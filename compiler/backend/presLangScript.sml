@@ -1,5 +1,5 @@
 open preamble astTheory;
-open conLangTheory modLangTheory exhLangTheory structuredLangTheory;
+open conLangTheory modLangTheory exhLangTheory patLangTheory structuredLangTheory;
 
 val _ = new_theory"presLang";
 
@@ -73,10 +73,6 @@ val _ = Datatype`
 
 (* Functions for converting intermediate languages to presLang. *)
 
-val num_to_str_def = tDefine "num_to_str"`
-  num_to_str n = if n < 26 then [CHR (97 + n)]
-                 else (num_to_str ((n DIV 26)-1)) ++ ([CHR (97 + (n MOD 26))])`
-cheat;
 (* modLang *)
 
 val mod_to_pres_pat_def = tDefine "mod_to_pres_pat"`
@@ -238,6 +234,25 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
   (exh_to_pres_pes ((p,e)::pes) =
     (exh_to_pres_pat p, exh_to_pres_exp e)::exh_to_pres_pes pes)`
   cheat;
+
+(* pat to pres. *)
+val num_to_varn_def = tDefine "num_to_str"`
+  num_to_varn n = if n < 26 then [CHR (97 + n)]
+                 else (num_to_str ((n DIV 26)-1)) ++ ([CHR (97 + (n MOD 26))])`
+cheat;
+
+val pat_to_pres_exp_def = tDefine "pat_to_pres_exp"`
+  (pat_to_pres_exp h (Letrec t es e) =
+    let len = LENGTH es in
+      Letrec t (es_to_pres_tups h (len-1) len es) (pat_to_pres_exp (h+len) e))
+  /\
+  (* Make give letrec functions names and variable names. *)
+  (es_to_pres_tups _ _ _ [] = [])
+  /\
+  (es_to_pres_tups h i len (e::es) =
+    (num_to_varn (h+i), num_to_varn (h+len), pat_to_pres_exp (h+len+1) e)
+    ::es_to_pres_tups h (i-1) len es)
+`cheat;
 
 (* Helpers for converting pres to structured. *)
 val empty_item_def = Define`
@@ -591,5 +606,8 @@ val dec_to_json_def = Define`
 
 val exh_to_json_def = Define`
   exh_to_json = lang_to_json "exhLang" exh_to_pres_exp`;
+
+val pat_to_json_def = Define`
+  pat_to_json = lang_to_json "patLang" (pat_to_pres_exp 0)`;
 
 val _ = export_theory();
