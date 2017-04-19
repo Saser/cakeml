@@ -247,7 +247,7 @@ val pat_to_pres_exp_def = tDefine "pat_to_pres_exp"`
   (pat_to_pres_exp h (Raise t e) = Raise t (pat_to_pres_exp h e))
   /\
   (pat_to_pres_exp h (Handle t e1 e2) =
-    Handle t (pat_to_pres_exp h e1) [(Pvar (num_to_varn h), pat_to_pres (h+1) e2)])
+    Handle t (pat_to_pres_exp h e1) [(Pvar (num_to_varn h), pat_to_pres_exp (h+1) e2)])
   /\
   (pat_to_pres_exp h (Lit t lit) = Lit t lit)
   /\
