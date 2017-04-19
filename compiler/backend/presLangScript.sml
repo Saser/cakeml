@@ -238,15 +238,38 @@ val exh_to_pres_exp_def = tDefine"exh_to_pres_exp"`
 (* pat to pres. *)
 val num_to_varn_def = tDefine "num_to_str"`
   num_to_varn n = if n < 26 then [CHR (97 + n)]
-                 else (num_to_str ((n DIV 26)-1)) ++ ([CHR (97 + (n MOD 26))])`
+                 else (num_to_varn ((n DIV 26)-1)) ++ ([CHR (97 + (n MOD 26))])`
 cheat;
 
 val pat_to_pres_exp_def = tDefine "pat_to_pres_exp"`
+  (pat_to_pres_exp h (Raise t e) = Raise t (pat_to_pres_exp h e) 
+  /\
+  (pat_to_pres_exp h (Handle t e1 e2) =
+    Handle t (pat_to_pres_exp h e1) [(Pvar (num_to_varn h), pat_to_pres (h+1) e2)] 
+  /\
+  (pat_to_pres_exp h (Lit t lit) = Lit t lit) 
+  /\
+  (pat_to_pres_exp h (Con t num es) =
+    Con t (Exhlang_con num) (MAP pat_to_pres_exp h es)) 
+  /\
+  (pat_to_pres_exp h (Var_local t num) = Var_local t (num_to_varn (h-num-1))
+  /\
+  (pat_to_pres_exp h (Var_global t num)
+  /\
+  (pat_to_pres_exp h (Fun t e)
+  /\
+  (pat_to_pres_exp h (App t op (e list))
+  /\
+  (pat_to_pres_exp h (If t e1 e2 e3)
+  /\
+  (pat_to_pres_exp h (Let t e1 e2) =
+    Let t (SOME (num_to_varn h)) (pat_to_pres_exp h e1) (pat_to_pres_exp (h+1) e2))
+   | Seq tra exp exp
   (pat_to_pres_exp h (Letrec t es e) =
     let len = LENGTH es in
       Letrec t (es_to_pres_tups h (len-1) len es) (pat_to_pres_exp (h+len) e))
-  /\
-  (* Make give letrec functions names and variable names. *)
+   | Extend_global tra num`;
+  (* Gives letrec functions names and variable names. *)
   (es_to_pres_tups _ _ _ [] = [])
   /\
   (es_to_pres_tups h i len (e::es) =
