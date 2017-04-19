@@ -172,25 +172,29 @@ val compile_funs_dom = Q.store_thm("compile_funs_dom",
 (*
  * EXPLORER: Currently there exists no initial position information for
  * declarations and other non-expression stuff. Therefore, we just feed it with
- * `orphan_trace` position information until further notice.
+ * `om_tra` position information until further notice.
  *)
+
+val om_tra_def = Define`
+  om_tra = Cons orphan_trace 1`;
+
 val alloc_defs_def = Define `
-  (alloc_defs next [] = []) ∧
-  (alloc_defs next (x::xs) =
-    (x, Var_global orphan_trace next) :: alloc_defs (next + 1) xs)`;
+  (alloc_defs n next [] = []) ∧
+  (alloc_defs n next (x::xs) =
+    (x, Var_global (Cons om_tra n) next) :: alloc_defs (n + 1) (next + 1) xs)`;
 
 val fst_alloc_defs = Q.store_thm("fst_alloc_defs",
-  `!next l. MAP FST (alloc_defs next l) = l`,
+  `!n next l. MAP FST (alloc_defs n next l) = l`,
   induct_on `l` >>
   rw [alloc_defs_def]);
 
 val alloc_defs_append = Q.store_thm("alloc_defs_append",
-  `!n l1 l2. alloc_defs n (l1++l2) = alloc_defs n l1 ++ alloc_defs (n + LENGTH l1) l2`,
+  `!m n l1 l2. alloc_defs m n (l1++l2) = alloc_defs m n l1 ++ alloc_defs (m + LENGTH l1) (n + LENGTH l1) l2`,
   induct_on `l1` >>
   srw_tac [ARITH_ss] [alloc_defs_def, arithmeticTheory.ADD1]);
 
 (*
- * EXPLORER: As above, we just feed it `orphan_trace` since we do not have any initial
+ * EXPLORER: As above, we just feed it `om_tra` since we do not have any initial
  * position information yet.
  *)
 val compile_dec_def = Define `
