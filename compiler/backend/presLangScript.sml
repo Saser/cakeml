@@ -7,7 +7,7 @@ val _ = new_theory"presLang";
 * presLang is a presentation language, encompassing intermediate languages from
 * modLang to patLang of the compiler, adopting their constructors. However, the
 * constructors for patLang differ a bit since we don't want to present
-* information using de bruijn indices but rather variable names. 
+* information using de bruijn indices but rather variable names.
 *
 * The purpose of presLang is to be an intermediate representation between an intermediate language of the
 * compiler and the structured language. By translating an intermediate language
@@ -349,15 +349,15 @@ val shift_to_structured_def = Define`
   (shift_to_structured Ror = empty_item "Ror")`;
 
 val op_to_structured_def = Define`
-  (op_to_structured (Patlang_op (Tag_eq n1 n2)) = Item NONE "Tag_eq"
-  [(num_to_structured n1);(num_to_structured n2)])
+  (op_to_structured (Patlang_op (Tag_eq n1 n2)) =
+    Item NONE "Tag_eq" [(num_to_structured n1);(num_to_structured n2)])
   /\
-  (op_to_structured (Patlang_op (El num)) = Item NONE "El" [num_to_structured
-  num])
+  (op_to_structured (Patlang_op (El num)) = Item NONE "El" [num_to_structured num])
   /\
   (op_to_structured (Patlang_op (Op op)) = op_to_structured (Conlang_op op))
   /\
-  (op_to_structured (Conlang_op (Init_global_var num)) = Item NONE "Init_global_var" [num_to_structured num])
+  (op_to_structured (Conlang_op (Init_global_var num)) =
+    Item NONE "Init_global_var" [num_to_structured num])
   /\
   (op_to_structured (Conlang_op (Op astop)) = Item NONE "Op" [op_to_structured (Ast_op (astop))])
   /\
@@ -365,15 +365,14 @@ val op_to_structured_def = Define`
   /\
   (op_to_structured (Ast_op (Opb opb)) = Item NONE "Opb" [opb_to_structured opb])
   /\
-  (op_to_structured (Ast_op (Opw word_size opw)) = Item NONE "Opw" [
-    word_size_to_structured word_size;
-    opw_to_structured opw
-  ])
+  (op_to_structured (Ast_op (Opw word_size opw)) =
+    Item NONE "Opw" [ word_size_to_structured word_size; opw_to_structured opw ])
   /\
-  (op_to_structured (Ast_op (Shift word_size shift num)) = Item NONE "Shift" [
-    word_size_to_structured word_size;
-    shift_to_structured shift;
-    num_to_structured num
+  (op_to_structured (Ast_op (Shift word_size shift num)) =
+    Item NONE "Shift" [
+      word_size_to_structured word_size;
+      shift_to_structured shift;
+      num_to_structured num
   ])
   /\
   (op_to_structured (Ast_op Equality) = empty_item "Equality")
@@ -630,7 +629,7 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       Item (SOME tra) "Letrec" [varexpTup'; pres_to_structured exp])
   /\
   (pres_to_structured (Seq tra e1 e2) =
-      Item (SOME tra) "Seq" [pres_to_structured e1; pres_to_structured e2])
+    Item (SOME tra) "Seq" [pres_to_structured e1; pres_to_structured e2])
   `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
