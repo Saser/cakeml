@@ -4,14 +4,18 @@ open conLangTheory modLangTheory exhLangTheory patLangTheory structuredLangTheor
 val _ = new_theory"presLang";
 
 (*
-* presLang is a presentation language, encompassing many intermediate languages
-* of the compiler, adopting their constructors. The purpose of presLang is to be
-* an intermediate representation between an intermediate language of the
+* presLang is a presentation language, encompassing intermediate languages from
+* modLang to patLang of the compiler, adopting their constructors. However, the
+* constructors for patLang differ a bit since we don't want to present
+* information using de bruijn indices but rather variable names. 
+*
+* The purpose of presLang is to be an intermediate representation between an intermediate language of the
 * compiler and the structured language. By translating an intermediate language
 * to presLang, it can be given a structured representation by calling
 * pres_to_strucutred on the presLang representation. presLang has no semantics,
 * as it is never evaluated, and may therefore mix operators, declarations,
 * patterns and expressions.
+*
 *)
 
 (* Special operator wrapper for presLang *)
@@ -243,6 +247,10 @@ val num_to_varn_def = tDefine "num_to_str"`
                  else (num_to_varn ((n DIV 26)-1)) ++ ([CHR (97 + (n MOD 26))])`
 cheat;
 
+(* The constructors in pat differ a bit because of de bruijn indices. This is
+* solved with the argument h, referring to head of our indexing. Combined with
+* num_to_varn this means we create varNs to match the presLang-constructors
+* where either nums or no name at all were provided. *)
 val pat_to_pres_exp_def = tDefine "pat_to_pres_exp"`
   (pat_to_pres_exp h (Raise t e) = Raise t (pat_to_pres_exp h e))
   /\
@@ -649,6 +657,9 @@ val dec_to_json_def = Define`
 val exh_to_json_def = Define`
   exh_to_json = lang_to_json "exhLang" exh_to_pres_exp`;
 
+(* pat_to_pres is initiated with a 0 because of how we want to convert de bruijn
+* indices to variable names and need to keep track of where head is at
+* currently, beginning at 0 *)
 val pat_to_json_def = Define`
   pat_to_json = lang_to_json "patLang" (pat_to_pres_exp 0)`;
 
