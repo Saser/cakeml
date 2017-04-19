@@ -18,7 +18,8 @@ val _ = new_theory"presLang";
 val _ = Datatype`
   op =
     | Ast_op ast$op
-    | Conlang_op conLang$op`;
+    | Conlang_op conLang$op
+    | Patlang_op patLang$op`;
 
 (* The format of a constructor, which differs by language. A Nothing constructor
 * indicates a tuple pattern. *)
@@ -69,7 +70,8 @@ val _ = Datatype`
          functions.
          The first varN is the function's name, and the second varN
          is its parameter. *)
-    | Letrec tra ((varN # varN # exp) list) exp`;
+    | Letrec tra ((varN # varN # exp) list) exp
+    | Seq tra exp exp`;
 
 (* Functions for converting intermediate languages to presLang. *)
 
@@ -242,33 +244,39 @@ val num_to_varn_def = tDefine "num_to_str"`
 cheat;
 
 val pat_to_pres_exp_def = tDefine "pat_to_pres_exp"`
-  (pat_to_pres_exp h (Raise t e) = Raise t (pat_to_pres_exp h e) 
+  (pat_to_pres_exp h (Raise t e) = Raise t (pat_to_pres_exp h e))
   /\
   (pat_to_pres_exp h (Handle t e1 e2) =
-    Handle t (pat_to_pres_exp h e1) [(Pvar (num_to_varn h), pat_to_pres (h+1) e2)] 
+    Handle t (pat_to_pres_exp h e1) [(Pvar (num_to_varn h), pat_to_pres (h+1) e2)])
   /\
-  (pat_to_pres_exp h (Lit t lit) = Lit t lit) 
+  (pat_to_pres_exp h (Lit t lit) = Lit t lit)
   /\
   (pat_to_pres_exp h (Con t num es) =
-    Con t (Exhlang_con num) (MAP pat_to_pres_exp h es)) 
+    Con t (Exhlang_con num) (MAP (pat_to_pres_exp h) es))
   /\
-  (pat_to_pres_exp h (Var_local t num) = Var_local t (num_to_varn (h-num-1))
+  (pat_to_pres_exp h (Var_local t num) = Var_local t (num_to_varn (h-num-1)))
   /\
-  (pat_to_pres_exp h (Var_global t num)
+  (pat_to_pres_exp h (Var_global t num) = Var_global t num)
   /\
-  (pat_to_pres_exp h (Fun t e)
+  (pat_to_pres_exp h (Fun t e) = Fun t (num_to_varn h) (pat_to_pres_exp (h+1) e))
   /\
-  (pat_to_pres_exp h (App t op (e list))
+  (pat_to_pres_exp h (App t op es) =
+    App t (Patlang_op op) (MAP (pat_to_pres_exp h) es))
   /\
-  (pat_to_pres_exp h (If t e1 e2 e3)
+  (pat_to_pres_exp h (If t e1 e2 e3) =
+    If t (pat_to_pres_exp h e1) (pat_to_pres_exp h e2) (pat_to_pres_exp h e3))
   /\
   (pat_to_pres_exp h (Let t e1 e2) =
     Let t (SOME (num_to_varn h)) (pat_to_pres_exp h e1) (pat_to_pres_exp (h+1) e2))
-   | Seq tra exp exp
+  /\
+  (pat_to_pres_exp h (Seq t e1 e2) = Seq t (pat_to_pres_exp h e1) (pat_to_pres_exp h e2))
+  /\
   (pat_to_pres_exp h (Letrec t es e) =
     let len = LENGTH es in
       Letrec t (es_to_pres_tups h (len-1) len es) (pat_to_pres_exp (h+len) e))
-   | Extend_global tra num`;
+  /\
+  (pat_to_pres_exp h (Extend_global t num) = Extend_global t num)
+  /\
   (* Gives letrec functions names and variable names. *)
   (es_to_pres_tups _ _ _ [] = [])
   /\
@@ -333,6 +341,14 @@ val shift_to_structured_def = Define`
   (shift_to_structured Ror = empty_item "Ror")`;
 
 val op_to_structured_def = Define`
+  (op_to_structured (Patlang_op (Tag_eq n1 n2)) = Item NONE "Tag_eq"
+  [(num_to_structured n1);(num_to_structured n2)])
+  /\
+  (op_to_structured (Patlang_op (El num)) = Item NONE "El" [num_to_structured
+  num])
+  /\
+  (op_to_structured (Patlang_op (Op op)) = op_to_structured (Conlang_op op))
+  /\
   (op_to_structured (Conlang_op (Init_global_var num)) = Item NONE "Init_global_var" [num_to_structured num])
   /\
   (op_to_structured (Conlang_op (Op astop)) = Item NONE "Op" [op_to_structured (Ast_op (astop))])
@@ -604,6 +620,9 @@ val pres_to_structured_def = tDefine"pres_to_structured"`
       pres_to_structured e
     ]) varexpTup) in
       Item (SOME tra) "Letrec" [varexpTup'; pres_to_structured exp])
+  /\
+  (pres_to_structured (Seq tra e1 e2) =
+      Item (SOME tra) "Seq" [pres_to_structured e1; pres_to_structured e2])
   `cheat;
 
 (* Function to construct general functions from a language to JSON. Call with
