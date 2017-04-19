@@ -37,6 +37,10 @@ val _ = Datatype`
 (* The code below replaces "Cons" in hol output with the chosen symbol *)
 val _ = set_fixity "▷" (Infixl 480);
 val _ = overload_on ("▷", Term `backend_common$Cons`);
+
+val orphan_trace_def = Define`
+  orphan_trace = Union Empty Empty`;
+
 (* Create new Cons trace, unless original trace is `None`, indicating traces are
 * turned off. *)
 val mk_cons_def = Define`

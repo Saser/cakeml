@@ -172,12 +172,12 @@ val compile_funs_dom = Q.store_thm("compile_funs_dom",
 (*
  * EXPLORER: Currently there exists no initial position information for
  * declarations and other non-expression stuff. Therefore, we just feed it with
- * `Empty` position information until further notice.
+ * `orphan_trace` position information until further notice.
  *)
 val alloc_defs_def = Define `
   (alloc_defs next [] = []) ∧
   (alloc_defs next (x::xs) =
-    (x, Var_global Empty next) :: alloc_defs (next + 1) xs)`;
+    (x, Var_global orphan_trace next) :: alloc_defs (next + 1) xs)`;
 
 val fst_alloc_defs = Q.store_thm("fst_alloc_defs",
   `!next l. MAP FST (alloc_defs next l) = l`,
@@ -190,25 +190,25 @@ val alloc_defs_append = Q.store_thm("alloc_defs_append",
   srw_tac [ARITH_ss] [alloc_defs_def, arithmeticTheory.ADD1]);
 
 (*
- * EXPLORER: As above, we just feed it `Empty` since we do not have any initial
+ * EXPLORER: As above, we just feed it `orphan_trace` since we do not have any initial
  * position information yet.
  *)
 val compile_dec_def = Define `
  (compile_dec next mn env d =
   case d of
    | Dlet p e =>
-       let e' = compile_exp Empty env e in
+       let e' = compile_exp orphan_trace env e in
        let xs = REVERSE (pat_bindings p []) in
        let l = LENGTH xs in
          (next + l,
           alist_to_ns (alloc_defs next xs),
-          Dlet l (Mat Empty e' [(compile_pat p, Con Empty NONE (MAP (Var_local Empty) xs))]))
+          Dlet l (Mat orphan_trace e' [(compile_pat p, Con orphan_trace NONE (MAP (Var_local orphan_trace) xs))]))
    | Dletrec funs =>
        let fun_names = REVERSE (MAP FST funs) in
        let env' = alist_to_ns (alloc_defs next fun_names) in
          (next + LENGTH fun_names,
           env',
-          Dletrec (compile_funs Empty (nsAppend env' env) (REVERSE funs)))
+          Dletrec (compile_funs orphan_trace (nsAppend env' env) (REVERSE funs)))
    | Dtype type_def =>
        (next, nsEmpty, Dtype mn type_def)
    | Dtabbrev tvs tn t =>
