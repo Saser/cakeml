@@ -24,9 +24,10 @@ val _ = Define `
   (init_global_funs tra tidx next ((f,x,e)::funs) =
    Let (mk_cons tra tidx) NONE (App (mk_cons tra (tidx+1)) (Init_global_var next) [Fun (mk_cons tra (tidx+2)) x e]) (init_global_funs tra (tidx+3) (next+1) funs))`;
 
-(*TODO: We should find a solution to add traces to declarations based on the
- * expression(s) they contain. Once we have a trace we should change from passing
- * on Empty into init_global_funs to the correct trace *)
+(* Special orphan trace for decLang. 3 is because decLang is the third lanugage. *)
+val oc_tra_def = Define`
+  (oc_tra = Cons orphan_trace 3)`;
+
 val _ = Define `
   (compile_decs next [] = Con Empty NONE [])
   ∧
@@ -43,29 +44,35 @@ val _ = Define `
 
 (* TODO: Since the Lets, cons, var_local and prompts don't have a trace we'll leave them as empty *)
 val _ = Define `
-  (compile_prompt none_tag some_tag next prompt =
+  (compile_prompt _ none_tag some_tag next prompt =
    case prompt of
     | Prompt ds =>
       let n = (num_defs ds) in
-        (next+n,
+        (1:num, next+n,
          Let Empty NONE (Extend_global Empty n)
            (Handle Empty (Let Empty NONE (compile_decs next ds)
                      (Con Empty (SOME none_tag) []))
              [(Pvar "x",
                Con Empty (SOME some_tag) [Var_local Empty "x"])])))`;
 
+(* c is a trace counter, which holds the value of the next trace number to be
+* used. *)
 val _ = Define`
-  (compile_prog none_tag some_tag next [] = (next, Con Empty (SOME none_tag) []))
+  (compile_prog c none_tag some_tag next [] = (c + 1, next, Con (Cons oc_tra c) (SOME none_tag) []))
   ∧
-  (compile_prog none_tag some_tag next (p::ps) =
-   let (next',p') = compile_prompt none_tag some_tag next p in
-   let (next'',ps') = compile_prog none_tag some_tag next' ps in
-     (next'',Mat Empty p' [(Pcon (SOME none_tag) [], ps'); (Pvar "x", Var_local Empty "x")]))`;
+  (compile_prog c none_tag some_tag next (p::ps) =
+   let (c, next',p') = compile_prompt c none_tag some_tag next p in
+   let (c, next'',ps') = compile_prog c none_tag some_tag next' ps in
+     (c + 2, next'',Mat (Cons oc_tra c) p'
+                        [(Pcon (SOME none_tag) [], ps'); (Pvar "x", Var_local
+                        (Cons oc_tra (c + 1)) "x")]))`;
 
 val _ = Define`
-  compile =
-    compile_prog
-    (none_tag, TypeId(Short"option"))
-    (some_tag, TypeId(Short "option"))`;
+  compile conf p =
+    let (c, n, e) = 
+      compile_prog 1
+        (none_tag, TypeId(Short"option"))
+        (some_tag, TypeId(Short "option")) conf p in
+          (n, e)`;
 
 val _ = export_theory()
