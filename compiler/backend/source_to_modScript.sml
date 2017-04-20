@@ -169,12 +169,7 @@ val compile_funs_dom = Q.store_thm("compile_funs_dom",
    PairCases_on `h` >>
    rw [compile_exp_def]);
 
-(*
- * EXPLORER: Currently there exists no initial position information for
- * declarations and other non-expression stuff. Therefore, we just feed it with
- * `om_tra` position information until further notice.
- *)
-
+(* We use om_tra as a basis trace for all orphan traces created here. *)
 val om_tra_def = Define`
   om_tra = Cons orphan_trace 1`;
 
@@ -193,10 +188,6 @@ val alloc_defs_append = Q.store_thm("alloc_defs_append",
   induct_on `l1` >>
   srw_tac [ARITH_ss] [alloc_defs_def, arithmeticTheory.ADD1]);
 
-(*
- * EXPLORER: As above, we just feed it `om_tra` since we do not have any initial
- * position information yet.
- *)
 val make_varls_def = Define`
   (make_varls n t [] = [])
   /\
@@ -250,6 +241,7 @@ val compile_top_def = Define `
         (n', next', nsAppend (nsLift mn new_env) env, Prompt (SOME mn) ds')`;
 
 val compile_prog_def = Define `
+  (* n counts the next number to wrap the orphan trace in. *)
   (compile_prog n next env [] = (next, env, [])) ∧
   (compile_prog n next env (p::ps) =
    let (n', next', env',p') = compile_top n next env p in
@@ -266,7 +258,7 @@ val empty_config_def = Define`
 
 val compile_def = Define`
   compile c p =
-    let (_,e,p') = compile_prog 0 c.next_global c.mod_env p in
+    let (_,e,p') = compile_prog 1 c.next_global c.mod_env p in
     (c with mod_env := e, p')`;
 
 val _ = export_theory();

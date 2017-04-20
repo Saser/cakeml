@@ -38,6 +38,13 @@ val _ = Datatype`
 val _ = set_fixity "▷" (Infixl 480);
 val _ = overload_on ("▷", Term `backend_common$Cons`);
 
+(* An "orphan" expression is one that originates directly from a declaration.
+* This happens in source_to_mod, and in con_to_dec. It is an orphan because
+* declarations don't come annotated with their source program locations right
+* now point (but they might in the future).
+* This is a trace that can be used as a basis for traces for orphan expressions.
+* It's structure guarantees it will not conflict with any trace originating from
+* source, since the always start with four Cons, indicating source position. *)
 val orphan_trace_def = Define`
   orphan_trace = Union Empty Empty`;
 
