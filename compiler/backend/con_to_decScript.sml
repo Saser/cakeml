@@ -29,31 +29,38 @@ val oc_tra_def = Define`
   (oc_tra = Cons orphan_trace 3)`;
 
 val _ = Define `
-  (compile_decs next [] = Con Empty NONE [])
+  (compile_decs c next [] = (c + 1, Con (Cons oc_tra c) NONE []))
   ∧
-  (compile_decs next (d::ds) =
+  (compile_decs c next (d::ds) =
+   (* Up to 3 new expressions are created at this point, so we need 7 new traces. *)
+   let (c, ts) = (c + 3, MAP (Cons oc_tra) (GENLIST (\n. n + c) 3)) in
    case d of
    | Dlet n e =>
      let vars = (GENLIST (λn. STRCAT"x"(num_to_dec_string n)) n) in
-       Let (mk_cons Empty 1) NONE (Mat (mk_cons Empty 2) e [(Pcon NONE (MAP Pvar
-       vars), init_globals Empty 3 vars next)])
-         (compile_decs (next+n) ds)
+     let (c, decs) = compile_decs c (next + n) ds in
+       (c,
+       Let (EL 0 ts) NONE (Mat (EL 1 ts) e [(Pcon NONE (MAP Pvar
+       vars), init_globals (EL 2 ts) 3 vars next)]) decs)
    | Dletrec funs =>
      let n = (LENGTH funs) in
-       Let (mk_cons Empty 1) NONE (init_global_funs Empty 2 next funs) (compile_decs (next+n) ds))`;
+     let (c, decs) = compile_decs c (next + n) ds in
+       (c,
+       Let (EL 0 ts) NONE (init_global_funs (EL 1 ts) 2 next funs) decs))`;
 
-(* TODO: Since the Lets, cons, var_local and prompts don't have a trace we'll leave them as empty *)
 val _ = Define `
-  (compile_prompt _ none_tag some_tag next prompt =
+  (compile_prompt c none_tag some_tag next prompt =
    case prompt of
     | Prompt ds =>
       let n = (num_defs ds) in
-        (1:num, next+n,
-         Let Empty NONE (Extend_global Empty n)
-           (Handle Empty (Let Empty NONE (compile_decs next ds)
-                     (Con Empty (SOME none_tag) []))
+      let (c, decs) = compile_decs c next ds in
+      (* 7 new expressions are created at this point, so we need 7 new traces. *)
+      let (c, ts) = (c + 7, MAP (Cons oc_tra) (GENLIST (\n. n + c) 7)) in
+        (c, next+n,
+         Let (EL 0 ts) NONE (Extend_global (EL 1 ts) n)
+           (Handle (EL 2 ts) (Let (EL 3 ts) NONE decs
+                     (Con (EL 4 ts) (SOME none_tag) []))
              [(Pvar "x",
-               Con Empty (SOME some_tag) [Var_local Empty "x"])])))`;
+               Con (EL 5 ts) (SOME some_tag) [Var_local (EL 6 ts) "x"])])))`;
 
 (* c is a trace counter, which holds the value of the next trace number to be
 * used. *)
