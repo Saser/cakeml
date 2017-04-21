@@ -68,7 +68,7 @@ val compile_exp_def = tDefine"compile_exp"`
   ∧
   (compile_exp t env (Fun x e) =
     let (t1, t2) = (mk_cons t 1, mk_cons t 2) in
-      Fun t1 x (compile_exp t (nsBind x (Var_local t1 x) env) e))
+      Fun t1 x (compile_exp t (nsBind x (Var_local t2 x) env) e))
   ∧
   (compile_exp t env (App op es) =
     App t op (compile_exps t env es))
