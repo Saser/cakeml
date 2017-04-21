@@ -15,13 +15,13 @@ val cons_bool_def = Define `
   cons_bool t b = Con t (if b then true_tag else false_tag) []`;
 
 val sIf_def = Define `
-  sIf t e1 e2 e3 =
+  sIf tra e1 e2 e3 =
   if e2 = Bool T ∧ e3 = Bool F
     then e1
   else
     (dtcase e1 of
      | Con _ t [] => if t = true_tag then e2 else e3
-     | _ => If t e1 e2 e3)`;
+     | _ => If tra e1 e2 e3)`;
 
 val sIf_pmatch = Q.store_thm("sIf_pmatch",`!e1 e2 e3.
   sIf t e1 e2 e3 =
