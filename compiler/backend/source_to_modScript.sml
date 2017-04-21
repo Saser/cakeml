@@ -45,8 +45,8 @@ val pat_tups_def = Define`
   (pat_tups t [] = [])
   /\
   (pat_tups t (x::xs) =
-    let t = mk_cons t ((LENGTH xs) + 1) in
-      (x, Var_local t x)::pat_tups t xs)`;
+    let t' = mk_cons t ((LENGTH xs) + 1) in
+      (x, Var_local t' x)::pat_tups t xs)`;
 
 (* The traces are passed along without being split for most expressions, since we
 * expect Lannots to appear around every expression. *)
