@@ -1,5 +1,4 @@
 open preamble astTheory terminationTheory modLangTheory;
-open jsonTheory;
 
 val _ = numLib.prefer_num();
 
@@ -15,12 +14,11 @@ val _ = new_theory"source_to_mod";
  * Closures rather than Recclosures.
  *)
 
- (*
-  * EXPLORER: The `t` parameter is the position information ("t" for "trace").
-  *)
+(* The traces start at 2 because this expression is called only from within
+ * compile_exp, where `mk_cons t 1` has been used. *)
 val Bool_def = Define `
  Bool t b =
-  let (t1, t2, t3) = (mk_cons t 1, mk_cons t 2, mk_cons t 3) in
+  let (t1, t2, t3) = (mk_cons t 2, mk_cons t 3, mk_cons t 4) in
    (App t1 (Opb (if b then Leq else Lt)) [Lit t2 (IntLit 0); Lit t3 (IntLit 0)])`;
 
 (*
@@ -74,17 +72,17 @@ val compile_exp_def = tDefine"compile_exp"`
     App t op (compile_exps t env es))
   ∧
   (compile_exp t env (Log lop e1 e2) =
-    let (t1, t2) = (mk_cons t 1, mk_cons t 2) in
+    let t' = mk_cons t 1 in
       case lop of
       | And =>
-        If t1
+        If t'
            (compile_exp t env e1)
            (compile_exp t env e2)
-           (Bool t2 F)
+           (Bool t F)
       | Or =>
-        If t1
+        If t'
            (compile_exp t env e1)
-           (Bool t2 T)
+           (Bool t T)
            (compile_exp t env e2))
   ∧
   (compile_exp t env (If e1 e2 e3) =
