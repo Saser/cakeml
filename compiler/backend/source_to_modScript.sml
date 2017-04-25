@@ -100,6 +100,9 @@ val compile_exp_def = tDefine"compile_exp"`
     let (t1, t2) = (mk_cons t 1, mk_cons t 2) in
       Let t1 (SOME x) (compile_exp t env e1) (compile_exp t (nsBind x (Var_local t2 x) env) e2))
   ∧
+  (compile_exp t env (Let NONE e1 e2) =
+    Let t NONE (compile_exp t env e1) (compile_exp t env e2))
+  ∧
   (compile_exp t env (Letrec funs e) =
     let fun_names = MAP FST funs in
     let new_env = nsBindList (MAP (\x. (x, Var_local t x)) fun_names) env in
