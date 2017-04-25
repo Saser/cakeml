@@ -33,12 +33,17 @@ val concat_with_def = Define`
   (concat_with [s] c acc = acc ++ s) /\
   (concat_with (s::ss) c acc = concat_with ss c (acc ++ s ++ c))`;
 
+(* To output a string in the JSON such that, if the string would be printed
+* directly, it should look like the corresponding CakeML value. *)
 val escape_def = Define`
   (escape "" = "")
   /\
-  (escape (#"\n"::s) = #"\\":: #"n" ::escape s)
+  (* Output two backslashes in the JSON, followed by an "n", which will be
+  * printed as "\n". *)
+  (escape (#"\n"::s) = #"\\":: #"\\" :: #"n" ::escape s)
   /\
-  (escape (#"\\"::s) = #"\\":: #"\\" ::escape s)
+  (* Output four backslashes in the JSON, which will be printed as "\\". *)
+  (escape (#"\\"::s) = #"\\":: #"\\" :: #"\\":: #"\\" ::escape s)
   /\
   (escape (#"\""::s) = #"\\":: #"\"" ::escape s)
   /\
