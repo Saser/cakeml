@@ -683,7 +683,7 @@ val conf_to_structured_def = Define`
             Item NONE "SOME" [Tuple [num_to_structured n; tid_or_exn_to_structured t]]
          | Exhlang_con c => Item NONE "SOME" [num_to_structured c]`;
 
-(* Takes a presLang$exp and produces json$obj that mimics its structure. *)
+(* Takes a presLang$exp and produces jsonLang$obj that mimics its structure. *)
 
 val MEM_exp_size = prove(
   ``!xs x. MEM x xs ==> exp_size x < exp12_size xs``,

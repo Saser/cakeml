@@ -1,4 +1,4 @@
-open preamble jsonTheory backend_commonTheory;
+open preamble jsonLangTheory backend_commonTheory;
 
 val _ = new_theory"structuredLang";
 
